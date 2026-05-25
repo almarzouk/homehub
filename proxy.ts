@@ -42,7 +42,7 @@ export default async function middleware(req: NextRequest) {
   }
 
   // Normaler NextAuth-Check
-  const response = await auth(req as unknown as Parameters<typeof auth>[0]);
+  const response = await auth(req as unknown as Parameters<typeof auth>[0]) as unknown as NextResponse | null;
 
   // CORS zu allen API-Antworten hinzufügen
   if (req.nextUrl.pathname.startsWith("/api/")) {
