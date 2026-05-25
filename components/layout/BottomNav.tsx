@@ -16,7 +16,7 @@ const tabs = [
   { href: "/kueche", icon: ChefHat, label: "Küche" },
   { href: "/vorrat", icon: Package, label: "Vorrat" },
   { href: "/finanzen/dashboard", icon: Wallet, label: "Finanzen" },
-  { href: "/haushalt", icon: LayoutGrid, label: "Mehr" },
+  { href: "/mehr", icon: LayoutGrid, label: "Mehr" },
 ];
 
 export default function BottomNav() {
