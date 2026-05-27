@@ -118,7 +118,7 @@ const sections: NavSection[] = [
     color: "text-pink-500",
     items: [
       { href: "/familie", label: "Mitglieder", icon: Users },
-      { href: "/familie/benachrichtigungen", label: "Benachrichtigungen", icon: Bell },
+      { href: "/benachrichtigungen", label: "Benachrichtigungen", icon: Bell, badge: true },
       { href: "/familie/termine", label: "Termine", icon: Calendar },
       { href: "/chat", label: "Haushalts-Chat", icon: MessageCircle },
       { href: "/fitness", label: "Fitness", icon: Activity },
@@ -140,10 +140,16 @@ const sections: NavSection[] = [
 export default function Sidebar() {
   const pathname = usePathname();
   const alertCount = useAlertCount();
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+
+  // Determine which section contains the current route
+  const activeSection = sections.find((s) =>
+    s.items.some((item) => pathname === item.href || pathname.startsWith(item.href + "/"))
+  )?.id ?? null;
+
+  const [openSection, setOpenSection] = useState<string | null>(activeSection);
 
   const toggleSection = (id: string) => {
-    setCollapsed((prev) => ({ ...prev, [id]: !prev[id] }));
+    setOpenSection((prev) => (prev === id ? null : id));
   };
 
   const isActive = (href: string) =>
@@ -182,7 +188,6 @@ export default function Sidebar() {
       {/* Sections */}
       <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
         {sections.map((section) => {
-          const isOpen = !collapsed[section.id];
           const SectionIcon = section.icon;
 
           return (
@@ -195,14 +200,14 @@ export default function Sidebar() {
                   <SectionIcon className={cn("h-4 w-4", section.color)} />
                   {section.label}
                 </div>
-                {isOpen ? (
+                {openSection === section.id ? (
                   <ChevronDown className="h-3.5 w-3.5" />
                 ) : (
                   <ChevronRight className="h-3.5 w-3.5" />
                 )}
               </button>
 
-              {isOpen && (
+              {openSection === section.id && (
                 <ul className="mt-0.5 space-y-0.5 pl-2">
                   {section.items.map(({ href, label, icon: Icon, badge }) => {
                     const active = isActive(href);
