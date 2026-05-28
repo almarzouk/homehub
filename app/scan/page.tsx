@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ScanLine, Camera, CameraOff, Search, X, CheckCircle, AlertCircle, ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -24,6 +24,9 @@ export default function ScanPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const animFrameRef = useRef<number>(0);
+  // useRef so the tick closure always reads the latest value without stale captures
+  const lastScannedRef = useRef<string | null>(null);
+  const loadingRef = useRef(false);
 
   const [mode, setMode] = useState<"camera" | "manual">("camera");
   const [cameraError, setCameraError] = useState<string | null>(null);
@@ -31,24 +34,22 @@ export default function ScanPage() {
   const [barcode, setBarcode] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
-  const [lastScanned, setLastScanned] = useState<string | null>(null);
+  // UI-only: checked synchronously inside startCamera from window directly
   const [supportsBarcodeDetector, setSupportsBarcodeDetector] = useState(false);
 
-  useEffect(() => {
-    setSupportsBarcodeDetector(typeof window !== "undefined" && "BarcodeDetector" in window);
-  }, []);
-
-  const stopCamera = useCallback(() => {
+  const stopCamera = () => {
     cancelAnimationFrame(animFrameRef.current);
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
     setScanning(false);
-  }, []);
+  };
 
-  const searchBarcode = useCallback(async (code: string) => {
-    if (!code.trim() || code === lastScanned) return;
-    setLastScanned(code);
+  const searchBarcode = async (code: string) => {
+    if (!code.trim() || code === lastScannedRef.current || loadingRef.current) return;
+    lastScannedRef.current = code;
+    loadingRef.current = true;
     setLoading(true);
+    setBarcode(code);
     setResult(null);
     try {
       const res = await fetch(`/api/vorrat/barcode?code=${encodeURIComponent(code.trim())}`);
@@ -58,14 +59,21 @@ export default function ScanPage() {
     } catch {
       setResult(null);
     } finally {
+      loadingRef.current = false;
       setLoading(false);
     }
-  }, [lastScanned, stopCamera]);
+  };
 
-  const startCamera = useCallback(async () => {
+  const startCamera = async () => {
     setCameraError(null);
     setResult(null);
-    setLastScanned(null);
+    lastScannedRef.current = null;
+    loadingRef.current = false;
+
+    // Check support directly from window — not from React state to avoid stale closure
+    const hasBarcodeDetector = typeof window !== "undefined" && "BarcodeDetector" in window;
+    setSupportsBarcodeDetector(hasBarcodeDetector);
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
@@ -77,25 +85,29 @@ export default function ScanPage() {
       }
       setScanning(true);
 
-      if (!supportsBarcodeDetector) return;
+      if (!hasBarcodeDetector) return;
 
       const detector = new window.BarcodeDetector!({
         formats: ["ean_13", "ean_8", "upc_a", "upc_e", "qr_code", "code_128", "code_39", "itf", "data_matrix"],
       });
 
-      const tick = async () => {
-        if (!videoRef.current || !streamRef.current) return;
-        try {
-          const barcodes = await detector.detect(videoRef.current);
-          if (barcodes.length > 0) {
-            const code = barcodes[0].rawValue;
-            setBarcode(code);
-            await searchBarcode(code);
+      // Throttle: run detection every 300ms instead of every animation frame
+      // to reduce CPU usage and avoid flooding
+      const tick = () => {
+        animFrameRef.current = window.setTimeout(async () => {
+          if (!videoRef.current || !streamRef.current) return;
+          if (videoRef.current.readyState >= 2) {
+            try {
+              const barcodes = await detector.detect(videoRef.current);
+              if (barcodes.length > 0) {
+                await searchBarcode(barcodes[0].rawValue);
+              }
+            } catch { /* ignore per-frame errors */ }
           }
-        } catch { /* ignore frame errors */ }
-        animFrameRef.current = requestAnimationFrame(tick);
+          tick();
+        }, 300);
       };
-      animFrameRef.current = requestAnimationFrame(tick);
+      tick();
     } catch (err) {
       const msg = err instanceof Error ? err.message : "";
       setCameraError(
@@ -105,19 +117,26 @@ export default function ScanPage() {
       );
       setMode("manual");
     }
-  }, [supportsBarcodeDetector, searchBarcode]);
+  };
+
+  // Stop timer-based loop properly
+  const stopTick = () => {
+    clearTimeout(animFrameRef.current);
+    cancelAnimationFrame(animFrameRef.current);
+  };
 
   useEffect(() => {
     if (mode === "camera") startCamera();
-    else stopCamera();
-    return () => stopCamera();
+    else { stopTick(); stopCamera(); }
+    return () => { stopTick(); stopCamera(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
 
   const reset = () => {
     setResult(null);
     setBarcode("");
-    setLastScanned(null);
+    lastScannedRef.current = null;
+    loadingRef.current = false;
     if (mode === "camera") startCamera();
   };
 
