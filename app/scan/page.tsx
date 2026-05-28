@@ -399,6 +399,8 @@ export default function ScanPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const animFrameRef = useRef<number>(0);
+  // ZXing controls for cleanup (used on non-Chrome browsers)
+  const zxingControlsRef = useRef<{ stop: () => void } | null>(null);
   const lastScannedRef = useRef<string | null>(null);
   const loadingRef = useRef(false);
 
@@ -408,12 +410,18 @@ export default function ScanPage() {
   const [barcode, setBarcode] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<BarcodeResult | null>(null);
+  // true = native BarcodeDetector, false = ZXing fallback (both auto-scan)
   const [supportsBarcodeDetector, setSupportsBarcodeDetector] = useState(false);
 
   const stopTick = () => { clearTimeout(animFrameRef.current); cancelAnimationFrame(animFrameRef.current); };
 
   const stopCamera = () => {
     stopTick();
+    // Stop ZXing if active
+    if (zxingControlsRef.current) {
+      zxingControlsRef.current.stop();
+      zxingControlsRef.current = null;
+    }
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
     setScanning(false);
@@ -430,7 +438,7 @@ export default function ScanPage() {
       const res = await fetch(`/api/vorrat/barcode?code=${encodeURIComponent(code.trim())}`);
       const data: BarcodeResult = await res.json();
       setResult(data);
-      stopCamera(); // always stop camera after scan result — user takes action below
+      stopCamera();
     } catch {
       setResult(null);
     } finally {
@@ -459,25 +467,43 @@ export default function ScanPage() {
       }
       setScanning(true);
 
-      if (!hasBarcodeDetector) return;
-
-      const detector = new window.BarcodeDetector!({
-        formats: ["ean_13", "ean_8", "upc_a", "upc_e", "qr_code", "code_128", "code_39", "itf", "data_matrix"],
-      });
-
-      const tick = () => {
-        animFrameRef.current = window.setTimeout(async () => {
-          if (!videoRef.current || !streamRef.current) return;
-          if (videoRef.current.readyState >= 2) {
-            try {
-              const barcodes = await detector.detect(videoRef.current);
-              if (barcodes.length > 0) await searchBarcode(barcodes[0].rawValue);
-            } catch { /* ignore per-frame errors */ }
-          }
-          tick();
-        }, 300);
-      };
-      tick();
+      if (hasBarcodeDetector) {
+        // ── Native BarcodeDetector (Chrome / Edge desktop & Android) ──
+        const detector = new window.BarcodeDetector!({
+          formats: ["ean_13", "ean_8", "upc_a", "upc_e", "qr_code", "code_128", "code_39", "itf", "data_matrix"],
+        });
+        const tick = () => {
+          animFrameRef.current = window.setTimeout(async () => {
+            if (!videoRef.current || !streamRef.current) return;
+            if (videoRef.current.readyState >= 2) {
+              try {
+                const barcodes = await detector.detect(videoRef.current);
+                if (barcodes.length > 0) await searchBarcode(barcodes[0].rawValue);
+              } catch { /* ignore per-frame errors */ }
+            }
+            tick();
+          }, 300);
+        };
+        tick();
+      } else {
+        // ── ZXing fallback (iOS Safari, Firefox, all other browsers) ──
+        try {
+          const { BrowserMultiFormatReader } = await import("@zxing/browser");
+          const reader = new BrowserMultiFormatReader();
+          // decodeFromStream uses the existing stream and attaches to videoRef
+          const controls = await reader.decodeFromStream(
+            stream,
+            videoRef.current!,
+            (scanResult) => {
+              if (scanResult) searchBarcode(scanResult.getText());
+            }
+          );
+          zxingControlsRef.current = controls;
+        } catch {
+          // ZXing failed — show manual input instead
+          setSupportsBarcodeDetector(false);
+        }
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "";
       setCameraError(
@@ -495,6 +521,9 @@ export default function ScanPage() {
     return () => { stopTick(); stopCamera(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
+
+  // Whether any auto-scan method is active (native or ZXing)
+  const autoScanActive = supportsBarcodeDetector || !!zxingControlsRef.current;
 
   const reset = () => {
     setResult(null);
@@ -540,7 +569,7 @@ export default function ScanPage() {
                 <div className="absolute left-2 right-2 top-1/2 h-0.5 bg-blue-400/80 animate-pulse" />
               </div>
               <p className="absolute bottom-4 text-white/70 text-sm text-center px-4">
-                {supportsBarcodeDetector ? "Barcode in den Rahmen halten" : "Kamera aktiv — Barcode unten eingeben"}
+                Barcode in den Rahmen halten
               </p>
             </div>
           )}
@@ -583,8 +612,8 @@ export default function ScanPage() {
         </div>
       )}
 
-      {/* Manual input */}
-      {(mode === "manual" || (mode === "camera" && scanning && !supportsBarcodeDetector)) && !result && (
+      {/* Manual input — always in manual mode; in camera mode only if auto-scan unavailable */}
+      {(mode === "manual" || (mode === "camera" && scanning && !autoScanActive)) && !result && (
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 space-y-3">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Barcode manuell eingeben (EAN / UPC)</label>
           <div className="flex gap-2">
@@ -627,10 +656,10 @@ export default function ScanPage() {
             <ScanLine className="h-4 w-4 text-blue-500 flex-shrink-0" />
             <span>Unterstützte Formate: EAN-13, EAN-8, UPC-A, UPC-E, QR, Code128, Code39</span>
           </div>
-          {!supportsBarcodeDetector && mode === "camera" && (
+          {!autoScanActive && mode === "camera" && scanning && (
             <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
               <AlertCircle className="h-4 w-4 flex-shrink-0" />
-              <span>Automatischer Scan benötigt Chrome oder Edge. Barcode bitte manuell eingeben.</span>
+              <span>Automatischer Scan nicht verfügbar. Barcode bitte manuell eingeben.</span>
             </div>
           )}
         </div>
