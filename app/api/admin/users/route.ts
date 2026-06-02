@@ -22,7 +22,7 @@ export async function GET() {
   await connectDB();
 
   const users = await User.find({})
-    .select("name email role isBlocked isApproved householdId createdAt")
+    .select("name email role isBlocked isApproved householdId createdAt aiRequestsThisMonth aiRequestsMonth aiMonthlyLimit")
     .sort({ createdAt: -1 })
     .lean();
 
@@ -33,9 +33,11 @@ export async function GET() {
       email: u.email,
       role: u.role,
       isBlocked: u.isBlocked ?? false,
-      isApproved: u.isApproved !== false, // treat undefined (legacy) as approved
+      isApproved: u.isApproved !== false,
       householdId: u.householdId?.toString() ?? null,
       createdAt: u.createdAt,
+      aiMonthlyLimit: u.aiMonthlyLimit ?? 10,
+      aiRequestsThisMonth: u.aiRequestsThisMonth ?? 0,
     }))
   );
 }
@@ -46,13 +48,28 @@ export async function PATCH(req: NextRequest) {
   if (error) return error;
 
   const body = await req.json();
-  const { userId, action } = body as { userId: string; action: "block" | "unblock" | "makeAdmin" | "removeAdmin" | "approve" | "reject" };
+  const { userId, action, value } = body as {
+    userId: string;
+    action: "block" | "unblock" | "makeAdmin" | "removeAdmin" | "approve" | "reject" | "resetAI" | "setAILimit";
+    value?: number;
+  };
 
   if (!userId || !action) {
     return NextResponse.json({ error: "userId and action required" }, { status: 400 });
   }
 
   await connectDB();
+
+  if (action === "resetAI") {
+    await User.findByIdAndUpdate(userId, { $set: { aiRequestsThisMonth: 0, aiRequestsMonth: "" } });
+    return NextResponse.json({ ok: true });
+  }
+
+  if (action === "setAILimit") {
+    const limit = typeof value === "number" && value >= 0 ? value : 10;
+    await User.findByIdAndUpdate(userId, { $set: { aiMonthlyLimit: limit } });
+    return NextResponse.json({ ok: true });
+  }
 
   const updateMap: Record<string, object> = {
     block: { isBlocked: true },

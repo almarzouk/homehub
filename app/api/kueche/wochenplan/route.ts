@@ -5,6 +5,7 @@ import Gericht from "@/models/Gericht";
 import Kochgeraet from "@/models/Kochgeraet";
 import KIVerlauf from "@/models/KIVerlauf";
 import OpenAI from "openai";
+import { checkAILimit, incrementAIUsage } from "@/lib/ai-limit";
 
 // Cache: regenerate only once per week per household
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
@@ -42,6 +43,21 @@ export async function GET() {
 
   if (existing.length === 7) {
     return NextResponse.json({ weekKey, gerichte: existing.map(serialize) });
+  }
+
+  // Check AI usage limit before calling OpenAI
+  const userId = (session!.user as { id?: string }).id ?? "";
+  const limitResult = await checkAILimit(userId);
+  if (!limitResult.allowed) {
+    return NextResponse.json(
+      {
+        error: `KI-Limit erreicht (${limitResult.used}/${limitResult.limit} Anfragen diesen Monat). Bitte warten Sie bis nächsten Monat oder kontaktieren Sie den Administrator.`,
+        limitError: true,
+        used: limitResult.used,
+        limit: limitResult.limit,
+      },
+      { status: 429 }
+    );
   }
 
   // Generate new plan with OpenAI
@@ -146,8 +162,10 @@ Wichtig:
 
   const saved = await Gericht.insertMany(toSave);
 
+  // Increment AI usage counter
+  await incrementAIUsage(userId);
+
   // Save to KI cache log
-  const userId = (session!.user as { id?: string }).id;
   await KIVerlauf.create({
     typ: "wochenplan",
     titel: `Wochenplan ${weekKey}`,

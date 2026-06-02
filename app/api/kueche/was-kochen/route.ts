@@ -5,6 +5,7 @@ import Gericht from "@/models/Gericht";
 import Kochgeraet from "@/models/Kochgeraet";
 import KIVerlauf from "@/models/KIVerlauf";
 import OpenAI from "openai";
+import { checkAILimit, incrementAIUsage } from "@/lib/ai-limit";
 
 interface WasKochenBody {
   protein: string[];
@@ -70,7 +71,21 @@ export async function POST(req: NextRequest) {
   await connectDB();
 
   const householdId = (session!.user as { householdId?: string }).householdId;
-  const userId = (session!.user as { id?: string }).id;
+  const userId = (session!.user as { id?: string }).id ?? "";
+
+  // Check AI usage limit before calling OpenAI
+  const limitResult = await checkAILimit(userId);
+  if (!limitResult.allowed) {
+    return NextResponse.json(
+      {
+        error: `KI-Limit erreicht (${limitResult.used}/${limitResult.limit} Anfragen diesen Monat). Bitte warten Sie bis nächsten Monat oder kontaktieren Sie den Administrator.`,
+        limitError: true,
+        used: limitResult.used,
+        limit: limitResult.limit,
+      },
+      { status: 429 }
+    );
+  }
 
   const kochgeraete = await Kochgeraet.find(householdId ? { householdId } : {})
     .select("name")
@@ -176,6 +191,9 @@ Important: Use ONLY the ingredients the user specified. Keep cooking time under 
       { status: 500 }
     );
   }
+
+  // Increment AI usage counter after successful generation
+  await incrementAIUsage(userId);
 
   const result = rezepte.slice(0, 3);
 

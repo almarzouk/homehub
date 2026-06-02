@@ -19,6 +19,9 @@ import {
   Clock,
   X,
   Filter,
+  Sparkles,
+  RotateCcw,
+  Pencil,
 } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -32,6 +35,8 @@ interface AdminUser {
   isApproved: boolean;
   householdId: string | null;
   createdAt: string;
+  aiMonthlyLimit: number;
+  aiRequestsThisMonth: number;
 }
 
 type FilterTab = "all" | "pending" | "active" | "blocked" | "admins";
@@ -46,6 +51,7 @@ export default function AdminUsersPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<AdminUser | null>(null);
   const [error, setError] = useState("");
+  const [editingLimit, setEditingLimit] = useState<{ userId: string; value: string } | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -61,16 +67,25 @@ export default function AdminUsersPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  const doAction = async (userId: string, action: string) => {
+  const doAction = async (userId: string, action: string, value?: number) => {
     setActionLoading(userId + action);
     try {
       const res = await fetch("/api/admin/users", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, action }),
+        body: JSON.stringify({ userId, action, value }),
       });
       if (res.ok) await load();
     } finally { setActionLoading(null); }
+  };
+
+  const saveAILimit = async (userId: string) => {
+    if (!editingLimit) return;
+    const num = parseInt(editingLimit.value, 10);
+    if (!isNaN(num) && num >= 0) {
+      await doAction(userId, "setAILimit", num);
+    }
+    setEditingLimit(null);
   };
 
   const doDelete = async (userId: string) => {
@@ -258,14 +273,45 @@ export default function AdminUsersPage() {
                         {user.householdId.slice(-6)}
                       </span>
                     )}
+                    {/* AI usage */}
+                    <span className={`flex items-center gap-1 text-xs font-medium px-1.5 py-0.5 rounded-md ${
+                      user.aiRequestsThisMonth >= user.aiMonthlyLimit
+                        ? "bg-red-900/40 text-red-400"
+                        : user.aiRequestsThisMonth >= user.aiMonthlyLimit * 0.8
+                        ? "bg-orange-900/40 text-orange-400"
+                        : "bg-purple-900/30 text-purple-400"
+                    }`}>
+                      <Sparkles className="h-3 w-3" />
+                      {user.aiRequestsThisMonth}/
+                      {editingLimit?.userId === user._id ? (
+                        <input
+                          type="number"
+                          min={0}
+                          max={999}
+                          value={editingLimit.value}
+                          onChange={(e) => setEditingLimit({ userId: user._id, value: e.target.value })}
+                          onBlur={() => saveAILimit(user._id)}
+                          onKeyDown={(e) => { if (e.key === "Enter") saveAILimit(user._id); if (e.key === "Escape") setEditingLimit(null); }}
+                          className="w-10 bg-transparent outline-none border-b border-purple-500 text-xs"
+                          autoFocus
+                        />
+                      ) : (
+                        <button
+                          onClick={() => setEditingLimit({ userId: user._id, value: String(user.aiMonthlyLimit) })}
+                          className="hover:underline"
+                          title="Click to change limit"
+                        >
+                          {user.aiMonthlyLimit}
+                        </button>
+                      )}
+                    </span>
                   </div>
                 </div>
 
                 {/* Actions */}
                 <div className="flex items-center gap-1.5 flex-shrink-0">
                   {/* Approve / Reject (only for pending) */}
-                  {!user.isApproved && (
-                    <>
+                  {!user.isApproved && (                    <>
                       <button
                         onClick={() => doAction(user._id, "approve")}
                         disabled={!!actionLoading}
@@ -313,14 +359,23 @@ export default function AdminUsersPage() {
                     <Crown className="h-4 w-4" />
                   </button>
 
-                  {/* Block/Shield */}
+                  {/* Reset AI usage */}
                   <button
-                    onClick={() => doAction(user._id, user.isBlocked ? "unblock" : "block")}
-                    disabled={!!actionLoading}
-                    title={t("admin.blockUser")}
-                    className="p-2 rounded-lg bg-gray-800 text-gray-400 hover:bg-red-900/40 hover:text-red-400 transition-colors hidden"
+                    onClick={() => doAction(user._id, "resetAI")}
+                    disabled={!!actionLoading || user.aiRequestsThisMonth === 0}
+                    title="Reset AI usage"
+                    className="p-2 rounded-lg bg-purple-900/30 text-purple-400 hover:bg-purple-900/60 transition-colors disabled:opacity-30"
                   >
-                    <ShieldCheck className="h-4 w-4" />
+                    <RotateCcw className="h-4 w-4" />
+                  </button>
+
+                  {/* Edit AI limit */}
+                  <button
+                    onClick={() => setEditingLimit({ userId: user._id, value: String(user.aiMonthlyLimit) })}
+                    title="Edit AI limit"
+                    className="p-2 rounded-lg bg-gray-800 text-gray-400 hover:bg-purple-900/30 hover:text-purple-400 transition-colors"
+                  >
+                    <Pencil className="h-4 w-4" />
                   </button>
 
                   {/* Delete */}
