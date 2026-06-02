@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import Link from "next/link";
 import { Plus, Trash2, Settings, Users, Copy, Check, Shield, Layers } from "lucide-react";
 
@@ -10,6 +11,7 @@ interface HouseholdMember { _id: string; name: string; email: string; }
 interface Household { _id: string; name: string; inviteCode: string; memberCount: number; members: HouseholdMember[]; }
 
 export default function EinstellungenPage() {
+  const { t } = useTranslation();
   const [categories, setCategories] = useState<Category[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [household, setHousehold] = useState<Household | null>(null);
@@ -132,7 +134,7 @@ export default function EinstellungenPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-semibold text-gray-900 dark:text-white">{household.name}</p>
-                    <p className="text-sm text-gray-500">{household.memberCount} {household.memberCount === 1 ? "Mitglied" : "Mitglieder"}</p>
+                    <p className="text-sm text-gray-500">{household.memberCount} {household.memberCount === 1 ? "Mitglied" : t("einstellungen.members")}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-xs text-gray-400 mb-1">Einladungscode</p>
@@ -141,7 +143,7 @@ export default function EinstellungenPage() {
                       <button
                         onClick={() => { navigator.clipboard.writeText(household.inviteCode); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
                         className="p-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950 text-gray-400 hover:text-blue-600 transition-colors"
-                        title="Code kopieren">
+                        title={t("einstellungen.copyCode")}>
                         {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                       </button>
                     </div>

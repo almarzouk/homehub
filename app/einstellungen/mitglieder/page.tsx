@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import Link from "next/link";
 import {
   ArrowLeft, Shield, ShieldCheck, ShieldOff, Users, Eye, EyeOff, Pencil, Lock, Crown, RotateCcw,
@@ -49,6 +50,7 @@ const MODULES: ModuleDef[] = [
 ];
 
 export default function MitgliederPage() {
+  const { t } = useTranslation();
   const [members, setMembers] = useState<Member[]>([]);
   const [ownerId, setOwnerId] = useState("");
   const [coAdmins, setCoAdmins] = useState<string[]>([]);
@@ -198,7 +200,7 @@ export default function MitgliederPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Member list */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 space-y-2">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide px-2 pb-1">Mitglieder</h2>
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide px-2 pb-1">{t("einstellungen.members")}</h2>
           {members.length === 0 && (
             <p className="text-sm text-gray-400 px-2">Keine Mitglieder im Haushalt.</p>
           )}

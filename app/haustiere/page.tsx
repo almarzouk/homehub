@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { Plus, Trash2, PawPrint, Calendar, Syringe, ChevronDown, ChevronRight } from "lucide-react";
 
 interface Impfung {
@@ -42,6 +43,7 @@ function calcAlter(geburtsdatum?: string) {
 }
 
 export default function HaustierePage() {
+  const { t } = useTranslation();
   const [tiere, setTiere] = useState<Haustier[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);

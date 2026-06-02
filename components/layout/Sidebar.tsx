@@ -43,6 +43,8 @@ import ThemeToggle from "@/components/ui/ThemeToggle";
 import LanguageToggle from "@/components/ui/LanguageToggle";
 import { useAlertCount } from "@/hooks/useAlertCount";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useSession } from "next-auth/react";
+import { ShieldCheck } from "lucide-react";
 
 type NavSection = {
   id: string;
@@ -143,6 +145,8 @@ export default function Sidebar() {
   const pathname = usePathname();
   const alertCount = useAlertCount();
   const { t } = useTranslation();
+  const { data: session } = useSession();
+  const isAdmin = (session?.user as { role?: string })?.role === "admin";
 
   // Determine which section contains the current route
   const activeSection = sections.find((s) =>
@@ -249,6 +253,20 @@ export default function Sidebar() {
 
       {/* Language + Theme + User */}
       <div className="px-3 py-3 border-t border-gray-100 dark:border-gray-800 space-y-2">
+        {isAdmin && (
+          <Link
+            href="/admin"
+            className={cn(
+              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
+              pathname.startsWith("/admin")
+                ? "bg-yellow-50 dark:bg-yellow-950 text-yellow-700 dark:text-yellow-300"
+                : "text-gray-600 dark:text-gray-400 hover:bg-yellow-50 dark:hover:bg-yellow-950 hover:text-yellow-700"
+            )}
+          >
+            <ShieldCheck className="h-5 w-5" />
+            Admin Panel
+          </Link>
+        )}
         <div className="flex items-center justify-between px-3">
           <span className="text-xs text-gray-400">{t("nav.language")}</span>
           <LanguageToggle />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import {
   Calendar, Plus, Trash2, MapPin, Clock, Tag,
   ChevronDown, ChevronUp,
@@ -48,6 +49,7 @@ function isUpcoming(dateStr: string) {
 }
 
 export default function TerminePage() {
+  const { t } = useTranslation();
   const [termine, setTermine] = useState<Termin[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
@@ -116,7 +118,7 @@ export default function TerminePage() {
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-sm transition-colors shadow-sm"
         >
           <Plus className="h-4 w-4" />
-          Termin hinzufügen
+          {t("kalender.addEvent")}
         </button>
       </div>
 
@@ -213,7 +215,7 @@ export default function TerminePage() {
           <div className="w-16 h-16 bg-blue-50 dark:bg-blue-950 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Calendar className="h-8 w-8 text-blue-500" />
           </div>
-          <p className="text-gray-500 dark:text-gray-400 font-medium">Keine Termine vorhanden</p>
+          <p className="text-gray-500 dark:text-gray-400 font-medium">{t("kalender.noEvents")} vorhanden</p>
           <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Klicke auf &quot;Termin hinzufügen&quot; um loszulegen</p>
         </div>
       ) : (

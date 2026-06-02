@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import Link from "next/link";
 import { AlertTriangle, PackageX, TrendingDown, Clock, Calendar } from "lucide-react";
 

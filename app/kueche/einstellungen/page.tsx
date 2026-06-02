@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import {
   Plus, Trash2, Settings, Flame, CookingPot, Microwave, Gauge,
   UtensilsCrossed, ArrowUp, ArrowDown, Save, ChevronDown, ChevronRight,

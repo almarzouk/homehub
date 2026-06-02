@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { Plus, Trash2, Package, ExternalLink, CheckCircle, Clock, Truck, AlertCircle, ArchiveX } from "lucide-react";
 
 interface Lieferung {
@@ -36,6 +37,7 @@ function formatDate(str?: string) {
 }
 
 export default function LieferungenPage() {
+  const { t } = useTranslation();
   const [items, setItems] = useState<Lieferung[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -94,7 +96,7 @@ export default function LieferungenPage() {
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Lieferungen</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("lieferungen.title")}</h1>
           <p className="text-sm text-gray-500">{aktive > 0 ? `${aktive} aktive Sendung${aktive > 1 ? "en" : ""}` : "Alle zugestellt"}</p>
         </div>
         <button onClick={() => setShowForm(true)} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">

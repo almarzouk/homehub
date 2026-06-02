@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { Plus, Trash2, Car, Wrench, Calendar, ChevronDown, ChevronRight } from "lucide-react";
 
 interface Wartungseintrag {
@@ -47,6 +48,7 @@ function isNearDue(str?: string) {
 }
 
 export default function FahrzeugePage() {
+  const { t } = useTranslation();
   const [fahrzeuge, setFahrzeuge] = useState<Fahrzeug[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);

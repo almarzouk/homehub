@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { Plus, Trash2, Receipt } from "lucide-react";
 import { formatCurrency, getCurrentMonth } from "@/lib/utils";
 
@@ -18,6 +19,7 @@ interface Expense {
 const CATEGORIES = ["Lebensmittel", "Transport", "Wohnen", "Gesundheit", "Bildung", "Unterhaltung", "Kleidung", "Sonstiges"];
 
 export default function AusgabenPage() {
+  const { t } = useTranslation();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -63,7 +65,7 @@ export default function AusgabenPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Ausgaben</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("finanzen.expenses")}</h1>
           <p className="text-sm text-gray-500">{expenses.length} Einträge · {formatCurrency(total, currency)}</p>
         </div>
         <div className="flex gap-2 items-center">
@@ -124,7 +126,7 @@ export default function AusgabenPage() {
       ) : expenses.length === 0 ? (
         <div className="text-center py-20">
           <Receipt className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500">Keine Ausgaben in diesem Monat.</p>
+          <p className="text-gray-500">{t("finanzen.noExpenses")} in diesem Monat.</p>
         </div>
       ) : (
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 divide-y divide-gray-50 dark:divide-gray-800">

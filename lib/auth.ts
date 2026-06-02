@@ -57,6 +57,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           if (!isValid) return null;
 
+          // Block blocked users from logging in
+          if (user.isBlocked) return null;
+
           return {
             id: String(user._id),
             name: user.name,

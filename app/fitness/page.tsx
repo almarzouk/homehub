@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { Plus, Trash2, Activity, Dumbbell, Weight, Footprints, Moon } from "lucide-react";
 
 interface FitnessEintrag {
@@ -28,6 +29,7 @@ function formatDate(str: string) {
 }
 
 export default function FitnessPage() {
+  const { t } = useTranslation();
   const [entries, setEntries] = useState<FitnessEintrag[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { Bell, CheckCheck, AlertTriangle, Info, AlertOctagon } from "lucide-react";
 
 interface Alert {

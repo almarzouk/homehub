@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import Link from "next/link";
 import {
   Sparkles,
@@ -46,6 +47,7 @@ const SCHWIERIGKEITS_FARBE: Record<string, string> = {
 };
 
 export default function WochenplanPage() {
+  const { t } = useTranslation();
   const [gerichte, setGerichte] = useState<GerichtKI[]>([]);
   const [loading, setLoading] = useState(true);
   const [regenerating, setRegenerating] = useState(false);
@@ -117,7 +119,7 @@ export default function WochenplanPage() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <Sparkles className="h-6 w-6 text-orange-500" />
-              KI-Wochenplan
+              {t("kueche.aiPlan")}
             </h1>
             <p className="text-sm text-gray-500 mt-1">
               7 syrisch-libanesische Gerichte — automatisch generiert
@@ -130,7 +132,7 @@ export default function WochenplanPage() {
             className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white rounded-xl text-sm font-medium transition-colors"
           >
             <RefreshCw className={`h-4 w-4 ${regenerating ? "animate-spin" : ""}`} />
-            <span className="hidden sm:inline">Neu generieren</span>
+            <span className="hidden sm:inline">{t("kueche.regenerate")}</span>
             <span className="sm:hidden">Neu</span>
           </button>
         </div>

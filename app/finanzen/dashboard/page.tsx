@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import Link from "next/link";
 import { Wallet, TrendingUp, TrendingDown, AlertTriangle, Receipt, PiggyBank } from "lucide-react";
 import { formatCurrency, getCurrentMonth } from "@/lib/utils";
@@ -19,6 +20,7 @@ interface FinanzDashboard {
 }
 
 export default function FinanzenDashboardPage() {
+  const { t } = useTranslation();
   const [data, setData] = useState<FinanzDashboard | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -45,10 +47,10 @@ export default function FinanzenDashboardPage() {
       {/* Main stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: "Gehalt", value: data?.totalSalary ?? 0, icon: Wallet, color: "text-emerald-600", bg: "bg-emerald-50 dark:bg-emerald-950" },
-          { label: "Ausgaben", value: data?.totalExpenses ?? 0, icon: TrendingDown, color: "text-red-600", bg: "bg-red-50 dark:bg-red-950" },
+          { label: t("finanzen.salary"), value: data?.totalSalary ?? 0, icon: Wallet, color: "text-emerald-600", bg: "bg-emerald-50 dark:bg-emerald-950" },
+          { label: t("finanzen.expenses"), value: data?.totalExpenses ?? 0, icon: TrendingDown, color: "text-red-600", bg: "bg-red-50 dark:bg-red-950" },
           { label: "Investiert", value: data?.totalInvested ?? 0, icon: TrendingUp, color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-950" },
-          { label: "Verbleibend", value: data?.remainingBalance ?? 0, icon: PiggyBank, color: (data?.remainingBalance ?? 0) >= 0 ? "text-emerald-600" : "text-red-600", bg: (data?.remainingBalance ?? 0) >= 0 ? "bg-emerald-50 dark:bg-emerald-950" : "bg-red-50 dark:bg-red-950" },
+          { label: t("finanzen.remaining"), value: data?.remainingBalance ?? 0, icon: PiggyBank, color: (data?.remainingBalance ?? 0) >= 0 ? "text-emerald-600" : "text-red-600", bg: (data?.remainingBalance ?? 0) >= 0 ? "bg-emerald-50 dark:bg-emerald-950" : "bg-red-50 dark:bg-red-950" },
         ].map(({ label, value, icon: Icon, color, bg }) => (
           <div key={label} className={`${bg} rounded-2xl p-5`}>
             <Icon className={`h-5 w-5 ${color} mb-2`} />
@@ -64,7 +66,7 @@ export default function FinanzenDashboardPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {[
             { href: "/finanzen/ausgaben", label: "Ausgaben", icon: Receipt, color: "text-red-500" },
-            { href: "/finanzen/investitionen", label: "Investitionen", icon: TrendingUp, color: "text-blue-500" },
+            { href: "/finanzen/investitionen", label: t("finanzen.investments"), icon: TrendingUp, color: "text-blue-500" },
             { href: "/finanzen/benachrichtigungen", label: "Benachrichtigungen", icon: AlertTriangle, color: "text-orange-500", badge: data?.unreadAlerts.length },
           ].map(({ href, label, icon: Icon, color, badge }) => (
             <Link key={href} href={href} className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-4 flex items-center gap-3 hover:shadow-sm transition-shadow">

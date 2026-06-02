@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { PiggyBank, Plus, Trash2, Target } from "lucide-react";
 
 interface SparZiel {

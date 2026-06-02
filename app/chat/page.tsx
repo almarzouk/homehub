@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { Send, MessageCircle } from "lucide-react";
 
 interface ChatNachricht {
@@ -35,6 +36,7 @@ function avatarColor(name: string) {
 }
 
 export default function ChatPage() {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<ChatNachricht[]>([]);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
@@ -85,7 +87,7 @@ export default function ChatPage() {
   return (
     <div className="max-w-2xl mx-auto flex flex-col h-[calc(100vh-8rem)]">
       <div className="mb-4">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Haushalts-Chat</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("chat.title")}</h1>
         <p className="text-sm text-gray-500">Nachrichten für alle Haushaltsmitglieder</p>
       </div>
 
@@ -94,7 +96,7 @@ export default function ChatPage() {
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <MessageCircle className="h-12 w-12 text-gray-300 mb-3" />
-            <p className="text-gray-500">Noch keine Nachrichten. Schreibe die erste!</p>
+            <p className="text-gray-500">{t("chat.noMessages")}</p>
           </div>
         )}
         {messages.map((msg, i) => {

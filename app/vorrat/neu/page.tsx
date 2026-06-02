@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Package, Search, Image as ImageIcon, X } from "lucide-react";
@@ -12,6 +13,7 @@ const UNITS = ["piece", "kg", "g", "liter", "ml", "box", "pack"];
 const UNIT_LABELS: Record<string, string> = { piece: "Stück", kg: "kg", g: "g", liter: "Liter", ml: "ml", box: "Karton", pack: "Packung" };
 
 export default function NeuesProdukteSeite() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
@@ -108,7 +110,7 @@ export default function NeuesProdukteSeite() {
           <ArrowLeft className="h-5 w-5 text-gray-600 dark:text-gray-400" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Neues Produkt</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("vorrat.new")}</h1>
           <p className="text-sm text-gray-500">Zum Vorrat hinzufügen</p>
         </div>
       </div>

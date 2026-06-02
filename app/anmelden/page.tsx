@@ -5,10 +5,12 @@ import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Home, Loader2, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t } = useTranslation();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
   const error = searchParams.get("error");
 
@@ -17,7 +19,7 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(
-    error ? "E-Mail oder Passwort ist falsch." : null
+    error ? t("auth.invalidCredentials") : null
   );
 
   useEffect(() => {
@@ -43,7 +45,7 @@ function LoginForm() {
     setLoading(false);
 
     if (result?.error) {
-      setLoginError("E-Mail oder Passwort ist falsch.");
+      setLoginError(t("auth.invalidCredentials"));
     } else {
       router.push(callbackUrl);
       router.refresh();
@@ -58,11 +60,11 @@ function LoginForm() {
             <Home className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">HomeHub</h1>
-          <p className="text-gray-500 mt-1 text-sm">Küche · Vorrat · Finanzen</p>
+          <p className="text-gray-500 mt-1 text-sm">{t("nav.sections.kueche")} · {t("nav.sections.vorrat")} · {t("nav.sections.finanzen")}</p>
         </div>
 
         <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 p-8">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Anmelden</h2>
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">{t("auth.login")}</h2>
 
           {loginError && (
             <div className="flex items-center gap-2 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 rounded-xl px-4 py-3 text-sm mb-5">
@@ -74,7 +76,7 @@ function LoginForm() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                E-Mail
+                {t("auth.email")}
               </label>
               <input
                 type="email"
@@ -89,7 +91,7 @@ function LoginForm() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                Passwort
+                {t("auth.password")}
               </label>
               <div className="relative">
                 <input
@@ -117,14 +119,14 @@ function LoginForm() {
               className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              {loading ? "Anmelden…" : "Anmelden"}
+              {loading ? t("common.loading") : t("auth.loginButton")}
             </button>
           </form>
 
           <p className="text-center text-sm text-gray-500 mt-6">
-            Noch kein Konto?{" "}
+            {t("auth.noAccount")}{" "}
             <Link href="/registrieren" className="text-blue-600 hover:text-blue-700 font-medium">
-              Registrieren
+              {t("auth.register")}
             </Link>
           </p>
         </div>

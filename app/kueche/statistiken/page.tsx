@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { ChefHat, Star, Clock, BarChart3 } from "lucide-react";
 
 interface Gericht {
@@ -14,6 +15,7 @@ interface Gericht {
 }
 
 export default function KuecheStatistikPage() {
+  const { t } = useTranslation();
   const [gerichte, setGerichte] = useState<Gericht[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,7 +43,7 @@ export default function KuecheStatistikPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { label: "Gerichte gesamt", value: gerichte.length, icon: <ChefHat className="h-5 w-5 text-orange-500" /> },
-          { label: "Favoriten", value: favoriten, icon: <Star className="h-5 w-5 text-yellow-500" /> },
+          { label: t("kueche.statistics.favorites"), value: favoriten, icon: <Star className="h-5 w-5 text-yellow-500" /> },
           { label: "Ø Kochzeit", value: avgZeit ? `${avgZeit} Min.` : "—", icon: <Clock className="h-5 w-5 text-blue-500" /> },
           { label: "Insgesamt gekocht", value: totalGekocht, icon: <BarChart3 className="h-5 w-5 text-green-500" /> },
         ].map((s) => (

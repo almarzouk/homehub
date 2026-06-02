@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { Plus, Trash2, Zap, Flame, Droplets, Thermometer } from "lucide-react";
 
 interface Energie {
@@ -27,6 +28,7 @@ const MONATE = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", 
 const emptyForm = { typ: "strom", monat: new Date().getMonth() + 1, jahr: new Date().getFullYear(), verbrauch: "", einheit: "kWh", kosten: "", zaehlerstand: "" };
 
 export default function EnergiePage() {
+  const { t } = useTranslation();
   const [items, setItems] = useState<Energie[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -84,7 +86,7 @@ export default function EnergiePage() {
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Energieverbrauch</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("energie.title")}</h1>
           <p className="text-sm text-gray-500">Strom, Gas, Wasser und Heizung im Überblick</p>
         </div>
         <button onClick={() => setShowForm(true)} className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">

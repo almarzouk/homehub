@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { FileBarChart, TrendingUp, TrendingDown, DollarSign } from "lucide-react";
 
 interface Expense { _id: string; amount: number; category: string; type: string; date: string; description?: string; }

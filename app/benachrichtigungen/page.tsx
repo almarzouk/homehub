@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { Bell, Trash2, RefreshCw, ExternalLink, Info } from "lucide-react";
 import Link from "next/link";
 
@@ -24,6 +25,7 @@ function timeAgo(dateStr: string) {
 }
 
 export default function BenachrichtigungenPage() {
+  const { t } = useTranslation();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [clearing, setClearing] = useState(false);
@@ -57,7 +59,7 @@ export default function BenachrichtigungenPage() {
             <Bell className="h-5 w-5 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Benachrichtigungen</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("benachrichtigungen.title")}</h1>
             <p className="text-sm text-gray-500">{notifications.length} Einträge</p>
           </div>
         </div>
@@ -103,7 +105,7 @@ export default function BenachrichtigungenPage() {
           <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
             <Info className="h-8 w-8 text-gray-400" />
           </div>
-          <p className="font-semibold text-gray-700 dark:text-gray-300">Keine Benachrichtigungen</p>
+          <p className="font-semibold text-gray-700 dark:text-gray-300">{t("benachrichtigungen.noNotifications")}</p>
           <p className="text-sm text-gray-500 mt-1">Neue Ereignisse erscheinen hier automatisch.</p>
         </div>
       ) : (

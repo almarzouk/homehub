@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { useSession } from "next-auth/react";
 import {
   Users, UserPlus, Trash2, Shield, User, Crown,
@@ -35,6 +36,7 @@ function avatarColor(name: string) {
 }
 
 export default function FamiliePage() {
+  const { t } = useTranslation();
   const { data: session } = useSession();
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
@@ -139,7 +141,7 @@ export default function FamiliePage() {
             <Users className="h-5 w-5 text-pink-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Familie</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("familie.title")}</h1>
             <p className="text-sm text-gray-500">{members.length} Mitglied{members.length !== 1 ? "er" : ""}</p>
           </div>
         </div>

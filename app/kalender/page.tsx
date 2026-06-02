@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { ChevronLeft, ChevronRight, Plus, Calendar, Clock, MapPin, Tag, Trash2 } from "lucide-react";
 
 interface Termin {
@@ -40,6 +41,7 @@ function getFirstDayOfMonth(year: number, month: number) {
 }
 
 export default function KalenderPage() {
+  const { t } = useTranslation();
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
@@ -212,7 +214,7 @@ export default function KalenderPage() {
             {selectedDay}. {MONATE[month]} {year}
           </h3>
           {selectedTermine.length === 0 ? (
-            <p className="text-sm text-gray-500">Keine Termine an diesem Tag.</p>
+            <p className="text-sm text-gray-500">{t("kalender.noEvents")} an diesem Tag.</p>
           ) : (
             <div className="space-y-2">
               {selectedTermine.map((t) => (

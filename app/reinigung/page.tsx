@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { Plus, Trash2, CheckCircle, Circle, Sparkles, Calendar, User, RefreshCw } from "lucide-react";
 
 interface Reinigung {
@@ -44,6 +45,7 @@ function isOverdue(naechste?: string) {
 }
 
 export default function ReinigungPage() {
+  const { t } = useTranslation();
   const [items, setItems] = useState<Reinigung[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -101,7 +103,7 @@ export default function ReinigungPage() {
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Reinigungsplan</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("reinigung.title")}</h1>
           <p className="text-sm text-gray-500">Aufgaben nach Bereich und Häufigkeit</p>
         </div>
         <button onClick={() => setShowForm(true)} className="flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
@@ -142,7 +144,7 @@ export default function ReinigungPage() {
       {loading ? (
         <div className="flex justify-center py-16"><div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" /></div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-20"><Sparkles className="h-12 w-12 text-gray-300 mx-auto mb-3" /><p className="text-gray-500">Keine Aufgaben gefunden.</p></div>
+        <div className="text-center py-20"><Sparkles className="h-12 w-12 text-gray-300 mx-auto mb-3" /><p className="text-gray-500">{t("reinigung.noTasks")} gefunden.</p></div>
       ) : (
         <div className="space-y-2">
           {filtered.map((item) => (

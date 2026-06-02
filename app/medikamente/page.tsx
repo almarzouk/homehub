@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { Plus, Trash2, AlertTriangle, Pill, Camera } from "lucide-react";
 
 interface Medikament {
@@ -40,6 +41,7 @@ const emptyForm = {
 };
 
 export default function MedikamentePage() {
+  const { t } = useTranslation();
   const [medikamente, setMedikamente] = useState<Medikament[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -96,7 +98,7 @@ export default function MedikamentePage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Medikamente</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("medikamente.title")}</h1>
           <p className="text-sm text-gray-500">{medikamente.length} Einträge</p>
         </div>
         <button

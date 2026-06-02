@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, Fragment } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import {
   Plus, CheckCircle2, Circle, Trash2, Home, RefreshCw, Calendar, AlertTriangle,
 } from "lucide-react";
@@ -55,6 +56,7 @@ const emptyForm = {
 };
 
 export default function HaushaltPage() {
+  const { t } = useTranslation();
   const [aufgaben, setAufgaben] = useState<Aufgabe[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -131,8 +133,8 @@ export default function HaushaltPage() {
       <div className="grid grid-cols-3 gap-3">
         {[
           { label: "Gesamt", value: aufgaben.length, color: "text-gray-700 dark:text-gray-200" },
-          { label: "Offen", value: offen, color: "text-orange-600 dark:text-orange-400" },
-          { label: "Erledigt", value: erledigt, color: "text-emerald-600 dark:text-emerald-400" },
+          { label: t("haushalt.pending"), value: offen, color: "text-orange-600 dark:text-orange-400" },
+          { label: t("haushalt.completed"), value: erledigt, color: "text-emerald-600 dark:text-emerald-400" },
         ].map(({ label, value, color }) => (
           <div key={label} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 text-center">
             <p className={`text-2xl font-bold ${color}`}>{value}</p>

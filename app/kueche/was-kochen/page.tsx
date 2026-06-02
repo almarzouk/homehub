@@ -19,6 +19,8 @@ import {
   History,
   Trash2,
 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useTranslation } from "@/hooks/useTranslation";
 
 // ─── Wizard Steps Data ───────────────────────────────────────────────────────
 
@@ -66,6 +68,19 @@ const ZEIT_OPTIONS = [
 ];
 
 const PERSONEN_OPTIONS = [1, 2, 3, 4, 5, 6, 8];
+
+const CUISINE_OPTIONS = [
+  { id: "beliebig", label: "Any / International", emoji: "🌍" },
+  { id: "syrisch", label: "Syrian", emoji: "🇸🇾" },
+  { id: "libanesisch", label: "Lebanese", emoji: "🇱🇧" },
+  { id: "arabisch", label: "Arabic", emoji: "🌙" },
+  { id: "türkisch", label: "Turkish", emoji: "🇹🇷" },
+  { id: "iranisch", label: "Persian", emoji: "🇮🇷" },
+  { id: "indisch", label: "Indian", emoji: "🇮🇳" },
+  { id: "italienisch", label: "Italian", emoji: "🇮🇹" },
+  { id: "mediterran", label: "Mediterranean", emoji: "🫒" },
+  { id: "international", label: "Fusion", emoji: "🍽️" },
+];
 
 const SCHWIERIGKEITS_FARBE: Record<string, string> = {
   einfach: "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300",
@@ -130,9 +145,12 @@ function MultiSelectChips({
 
 export default function WasKochenPage() {
   const router = useRouter();
+  const { lang } = useLanguage();
+  const { t } = useTranslation();
 
   // Wizard state
-  const [step, setStep] = useState(0); // 0–5 = questions, 6 = results
+  const [step, setStep] = useState(0); // 0–6 = questions, 7 = results
+  const [kueche, setKueche] = useState("beliebig");
   const [protein, setProtein] = useState<string[]>([]);
   const [staerke, setSaerke] = useState<string[]>([]);
   const [gemuese, setGemuese] = useState<string[]>([]);
@@ -192,6 +210,13 @@ export default function WasKochenPage() {
 
   const STEPS = [
     {
+      title: t("kueche.cuisineStyle") || "Which cuisine style?",
+      subtitle: t("kueche.cuisineStyleSub") || "Choose one",
+      icon: "🍽️",
+      canSkip: false,
+      valid: true,
+    },
+    {
       title: "Was hast du im Kühlschrank?",
       subtitle: "Protein / Fleisch (mehrere möglich)",
       icon: "🥩",
@@ -236,7 +261,7 @@ export default function WasKochenPage() {
   ];
 
   const current = STEPS[step];
-  const progress = ((step) / STEPS.length) * 100;
+  const progress = (step / STEPS.length) * 100;
 
   const next = () => {
     if (step < STEPS.length - 1) setStep((s) => s + 1);
@@ -249,6 +274,7 @@ export default function WasKochenPage() {
 
   const reset = () => {
     setStep(0);
+    setKueche("beliebig");
     setProtein([]);
     setSaerke([]);
     setGemuese([]);
@@ -269,13 +295,13 @@ export default function WasKochenPage() {
     setLoading(true);
     setError("");
     setRezepte([]);
-    setStep(6);
+    setStep(STEPS.length + 1);
 
     try {
       const res = await fetch("/api/kueche/was-kochen", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ protein, staerke, gemuese, zeitMinuten, personen, extra }),
+        body: JSON.stringify({ protein, staerke, gemuese, zeitMinuten, personen, extra, kueche, sprache: lang }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -323,7 +349,7 @@ export default function WasKochenPage() {
   };
 
   // ── Results View ────────────────────────────────────────────────────────────
-  if (step === 6) {
+  if (step >= STEPS.length + 1 || step === STEPS.length) {
     // Still loading cache on first mount
     if (loadingCache) {
       return (
@@ -610,6 +636,27 @@ export default function WasKochenPage() {
 
         {/* Step content */}
         {step === 0 && (
+          <div className="grid grid-cols-2 gap-2">
+            {CUISINE_OPTIONS.map((opt) => (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => setKueche(opt.id)}
+                className={`flex items-center gap-2 px-3 py-3 rounded-xl border text-sm font-medium transition-all ${
+                  kueche === opt.id
+                    ? "bg-orange-500 border-orange-500 text-white shadow-sm"
+                    : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-orange-300"
+                }`}
+              >
+                <span>{opt.emoji}</span>
+                <span>{opt.label}</span>
+                {kueche === opt.id && <Check className="h-3.5 w-3.5 ml-auto" />}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {step === 1 && (
           <MultiSelectChips
             options={PROTEIN_OPTIONS}
             selected={protein}
@@ -617,7 +664,7 @@ export default function WasKochenPage() {
           />
         )}
 
-        {step === 1 && (
+        {step === 2 && (
           <MultiSelectChips
             options={STAERKE_OPTIONS}
             selected={staerke}
@@ -625,7 +672,7 @@ export default function WasKochenPage() {
           />
         )}
 
-        {step === 2 && (
+        {step === 3 && (
           <MultiSelectChips
             options={GEMUESE_OPTIONS}
             selected={gemuese}
@@ -633,7 +680,7 @@ export default function WasKochenPage() {
           />
         )}
 
-        {step === 3 && (
+        {step === 4 && (
           <div className="grid grid-cols-2 gap-3">
             {ZEIT_OPTIONS.map((opt) => (
               <button
@@ -656,7 +703,7 @@ export default function WasKochenPage() {
           </div>
         )}
 
-        {step === 4 && (
+        {step === 5 && (
           <div className="flex flex-wrap gap-2">
             {PERSONEN_OPTIONS.map((n) => (
               <button
@@ -679,7 +726,7 @@ export default function WasKochenPage() {
           </div>
         )}
 
-        {step === 5 && (
+        {step === 6 && (
           <textarea
             value={extra}
             onChange={(e) => setExtra(e.target.value)}

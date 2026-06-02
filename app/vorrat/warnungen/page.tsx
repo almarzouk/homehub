@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import Link from "next/link";
 import { AlertTriangle, Clock, TrendingDown, Package, CheckCircle } from "lucide-react";
 
@@ -22,6 +23,7 @@ interface AlertData {
 }
 
 export default function WarnungenPage() {
+  const { t } = useTranslation();
   const [data, setData] = useState<AlertData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -85,10 +87,10 @@ export default function WarnungenPage() {
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Warnungen</h1>
         <p className="text-sm text-gray-500">{total} Artikel benötigen Aufmerksamkeit</p>
       </div>
-      <Section title="Nicht vorrätig" items={data?.outOfStock ?? []} icon={Package} color="text-red-600" />
-      <Section title="Niedriger Bestand" items={data?.lowStock ?? []} icon={TrendingDown} color="text-yellow-600" />
-      <Section title="Abgelaufen" items={data?.expired ?? []} icon={AlertTriangle} color="text-red-600" />
-      <Section title="Läuft bald ab" items={data?.expiringSoon ?? []} icon={Clock} color="text-orange-600" />
+      <Section title={t("vorrat.warningTypes.outOfStock")} items={data?.outOfStock ?? []} icon={Package} color="text-red-600" />
+      <Section title={t("vorrat.warningTypes.lowStock")} items={data?.lowStock ?? []} icon={TrendingDown} color="text-yellow-600" />
+      <Section title={t("vorrat.warningTypes.expired")} items={data?.expired ?? []} icon={AlertTriangle} color="text-red-600" />
+      <Section title={t("vorrat.warningTypes.expiringSoon")} items={data?.expiringSoon ?? []} icon={Clock} color="text-orange-600" />
     </div>
   );
 }

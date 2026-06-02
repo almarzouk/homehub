@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { Plus, Trash2, FileText, AlertTriangle, Eye, X, Calendar } from "lucide-react";
 
 interface Dokument {
@@ -32,6 +33,7 @@ const emptyForm = {
 };
 
 export default function DokumentePage() {
+  const { t } = useTranslation();
   const [dokumente, setDokumente] = useState<Dokument[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -111,7 +113,7 @@ export default function DokumentePage() {
         <div className="flex items-start gap-3 p-4 rounded-2xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900">
           <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
           <p className="text-sm font-medium text-red-700 dark:text-red-400">
-            {expiredCount} {expiredCount === 1 ? "Dokument" : "Dokumente"} abgelaufen
+            {expiredCount} {expiredCount === 1 ? "Dokument" : t("dokumente.title")} abgelaufen
           </p>
         </div>
       )}

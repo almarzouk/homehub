@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { Wallet, Plus, Trash2 } from "lucide-react";
 
 interface Allocation { kategorie: string; prozent: number; betrag: number; }

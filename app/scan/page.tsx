@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { useRouter } from "next/navigation";
 import {
   ScanLine, Camera, CameraOff, Search, X,
@@ -396,6 +397,7 @@ function NewProductForm({ barcode, suggestedName, suggestedImage, onNewScan }: {
 
 // ─── Main scan page ───────────────────────────────────────────────────────────
 export default function ScanPage() {
+  const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const animFrameRef = useRef<number>(0);
@@ -538,7 +540,7 @@ export default function ScanPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Barcode scannen</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("vorrat.scan.title")}</h1>
           <p className="text-sm text-gray-500">Produkt suchen, buchen oder anlegen</p>
         </div>
         <div className="flex gap-2">

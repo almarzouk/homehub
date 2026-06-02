@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import { useTranslation } from "@/hooks/useTranslation";
 import { Plus, Search, Star, ChefHat, Clock, Sparkles, HelpCircle } from "lucide-react";
 
 interface Gericht {
@@ -18,6 +19,7 @@ interface Gericht {
 }
 
 export default function KuechePage() {
+  const { t } = useTranslation();
   const [gerichte, setGerichte] = useState<Gericht[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -57,7 +59,7 @@ export default function KuechePage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Küche</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("kueche.title")}</h1>
           <p className="text-sm text-gray-500">{gerichte.length} Gerichte</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -66,7 +68,7 @@ export default function KuechePage() {
             className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-2 rounded-xl text-sm font-medium transition-colors"
           >
             <HelpCircle className="h-4 w-4" />
-            <span className="hidden sm:inline">Was kochen?</span>
+            <span className="hidden sm:inline">{t("kueche.whatToCook")}</span>
             <span className="sm:hidden">Was kochen?</span>
           </Link>
           <Link
@@ -75,14 +77,14 @@ export default function KuechePage() {
           >
             <Sparkles className="h-4 w-4" />
             <span className="hidden sm:inline">KI-Wochenplan</span>
-            <span className="sm:hidden">Wochenplan</span>
+            <span className="sm:hidden">{t("kueche.weeklyPlan")}</span>
           </Link>
           <Link
             href="/kueche/neu"
             className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-xl text-sm font-medium transition-colors"
           >
             <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Neues Gericht</span>
+            <span className="hidden sm:inline">{t("kueche.new")}</span>
             <span className="sm:hidden">Neu</span>
           </Link>
         </div>
@@ -94,7 +96,7 @@ export default function KuechePage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
             type="text"
-            placeholder="Gerichte suchen…"
+            placeholder={t("kueche.search")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"

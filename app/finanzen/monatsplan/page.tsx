@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { CalendarClock, Plus, Trash2 } from "lucide-react";
 
 interface PlanItem { name: string; betrag: number; kategorie: string; }

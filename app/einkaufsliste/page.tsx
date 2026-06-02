@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import { useTranslation } from "@/hooks/useTranslation";
 import { ShoppingCart, RefreshCw, Plus } from "lucide-react";
 
 interface Product {

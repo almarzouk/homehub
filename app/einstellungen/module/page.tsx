@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import Link from "next/link";
 import { ArrowLeft, ToggleLeft, ToggleRight, Save,
   LayoutDashboard, ChefHat, Package, Wallet, Sparkles, Pill, Gift,

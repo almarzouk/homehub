@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { Plus, Trash2, ShoppingCart, CheckCheck, Gift, ExternalLink } from "lucide-react";
 
 interface Wunsch {
@@ -32,6 +33,7 @@ const emptyForm = {
 };
 
 export default function WunschlistePage() {
+  const { t } = useTranslation();
   const [wuensche, setWuensche] = useState<Wunsch[]>([]);
   const [gesamtBudget, setGesamtBudget] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -175,7 +177,7 @@ export default function WunschlistePage() {
                       : "bg-purple-50 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400 hover:bg-purple-100"
                   }`}>
                   {w.gekauft ? <CheckCheck className="h-3.5 w-3.5" /> : <ShoppingCart className="h-3.5 w-3.5" />}
-                  {w.gekauft ? "Gekauft" : "Als gekauft markieren"}
+                  {w.gekauft ? t("wunschliste.purchased") : "Als gekauft markieren"}
                 </button>
                 {w.link && (
                   <a href={w.link} target="_blank" rel="noopener noreferrer"

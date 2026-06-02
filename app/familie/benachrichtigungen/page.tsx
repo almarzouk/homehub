@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { Send, Bell, Clock, Megaphone, Home, Package, ChefHat, AlertCircle, Users, Trash2, CheckCircle } from "lucide-react";
 import dynamic from "next/dynamic";
 

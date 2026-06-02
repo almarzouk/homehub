@@ -13,6 +13,8 @@ interface WasKochenBody {
   zeitMinuten: number;
   personen: number;
   extra?: string;
+  kueche?: string;   // e.g. "syrisch", "libanesisch", "italienisch", ...
+  sprache?: string;  // user's language code: "de", "ar", "en", "es", "bg"
 }
 
 // GET — load last cached "Was kochen?" result
@@ -63,7 +65,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body: WasKochenBody = await req.json();
-  const { protein, staerke, gemuese, zeitMinuten, personen, extra } = body;
+  const { protein, staerke, gemuese, zeitMinuten, personen, extra, kueche, sprache } = body;
 
   await connectDB();
 
@@ -78,42 +80,59 @@ export async function POST(req: NextRequest) {
 
   const zutatenListe = [
     protein.length > 0 && `Protein: ${protein.join(", ")}`,
-    staerke.length > 0 && `Sättigungsbeilage: ${staerke.join(", ")}`,
-    gemuese.length > 0 && `Gemüse: ${gemuese.join(", ")}`,
-    extra && `Sonstiges: ${extra}`,
+    staerke.length > 0 && `Starchy side: ${staerke.join(", ")}`,
+    gemuese.length > 0 && `Vegetables: ${gemuese.join(", ")}`,
+    extra && `Other: ${extra}`,
   ]
     .filter(Boolean)
     .join("\n");
 
+  // ── Dynamic language & cuisine ───────────────────────────────────────────
+  const cuisineLabel = kueche && kueche !== "beliebig" ? kueche : null;
+  const cuisineDesc = cuisineLabel
+    ? `traditional ${cuisineLabel} cuisine`
+    : "a variety of international cuisines (Mediterranean, Middle Eastern, European, Asian, etc.)";
+
+  const langInstructions: Record<string, string> = {
+    de: "Antworte NUR als valides JSON. Alle Texte (name, notizen, zutaten) auf Deutsch.",
+    ar: "أجب فقط كـ JSON صالح. جميع النصوص (name, notizen, zutaten) باللغة العربية.",
+    en: "Reply ONLY as valid JSON. All text (name, notizen, zutaten) in English.",
+    es: "Responde SOLO como JSON válido. Todos los textos (name, notizen, zutaten) en español.",
+    bg: "Отговори САМО като валиден JSON. Всички текстове (name, notizen, zutaten) на български.",
+  };
+  const lang = sprache && langInstructions[sprache] ? sprache : "de";
+  const langInstruction = langInstructions[lang];
+
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-  const prompt = `Du bist ein syrisch-libanesischer Kochexperte. Der Benutzer hat folgende Zutaten zu Hause:
+  const prompt = `You are a culinary expert specializing in ${cuisineDesc}. The user has these ingredients at home:
 
 ${zutatenListe}
-Verfügbare Zeit: ${zeitMinuten} Minuten
-Portionen: ${personen} Personen
-Verfügbare Kochgeräte: ${geraeteNamen}
+Available time: ${zeitMinuten} minutes
+Portions: ${personen} people
+Available appliances: ${geraeteNamen}
 
-Erstelle genau 3 verschiedene traditionelle syrische oder libanesische Gerichte, die man mit diesen Zutaten kochen kann.
+Create exactly 3 different recipes (inspired by ${cuisineDesc}) using these ingredients.
 
-Antworte NUR als valides JSON-Array (keine Markdown-Blöcke):
+${langInstruction}
+Reply ONLY as a valid JSON array (no markdown, no backticks):
 [
   {
-    "name": "Gerichtname auf Deutsch",
-    "kochgeraet": "eines der verfügbaren Geräte",
-    "programm": "z.B. Braten",
-    "leistung": "z.B. Mittlere Hitze",
-    "zeit": "z.B. 30 Minuten",
+    "name": "Recipe name",
+    "kochgeraet": "one of the available appliances",
+    "programm": "e.g. Fry",
+    "leistung": "e.g. Medium heat",
+    "zeit": "e.g. 30 minutes",
     "zeitMinuten": 30,
     "portionen": ${personen},
     "schwierigkeit": "einfach|mittel|schwer",
-    "zutaten": ["genaue Mengenangabe und Zutat", "..."],
-    "notizen": "Vollständige Schritt-für-Schritt Anleitung auf Deutsch. Min. 150 Wörter.",
-    "tags": ["syrisch", "..."]
+    "zutaten": ["exact amount and ingredient", "..."],
+    "notizen": "Full step-by-step instructions. Min. 150 words.",
+    "tags": ["${cuisineLabel ?? "international"}", "..."]
   }
 ]
 
-Wichtig: Verwende NUR die Zutaten, die der Benutzer angegeben hat. Halte die Kochzeit unter ${zeitMinuten} Minuten.`;
+Important: Use ONLY the ingredients the user specified. Keep cooking time under ${zeitMinuten} minutes.`;
 
   let rezepte: unknown[];
   let tokenVerbraucht = 0;
