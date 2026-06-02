@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { PiggyBank, Plus, Trash2, Target } from "lucide-react";
 
 interface SparZiel {
@@ -18,6 +19,8 @@ function fmt(cents: number) {
 }
 
 export default function SparZielePage() {
+  const { t } = useTranslation();
+  const { lang } = useLanguage();
   const [ziele, setZiele] = useState<SparZiel[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -36,7 +39,7 @@ export default function SparZielePage() {
   useEffect(() => { load(); }, [load]);
 
   const save = async () => {
-    if (!form.name || !form.targetAmount) { setError("Name und Zielbetrag sind Pflicht."); return; }
+    if (!form.name || !form.targetAmount) { setError(t("finanzen.requireNameAndAmount")); return; }
     setSaving(true);
     setError("");
     const res = await fetch("/api/finanzen/sparziele", {
@@ -68,49 +71,49 @@ export default function SparZielePage() {
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Sparziele</h1>
-          <p className="text-sm text-gray-500">{ziele.length} Ziele definiert</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("finanzen.savingsGoals")}</h1>
+          <p className="text-sm text-gray-500">{ziele.length} {t("finanzen.savingsGoalDesc")}</p>
         </div>
         <button onClick={() => setShowForm(true)} className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
-          <Plus className="h-4 w-4" />Neues Ziel
+          <Plus className="h-4 w-4" />{t("finanzen.newSavingsGoal")}
         </button>
       </div>
 
       {showForm && (
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 space-y-4">
-          <h2 className="font-semibold text-gray-900 dark:text-white">Neues Sparziel</h2>
+          <h2 className="font-semibold text-gray-900 dark:text-white">{t("finanzen.newSavingsGoalTitle")}</h2>
           {error && <p className="text-sm text-red-600">{error}</p>}
           <div>
-            <label className="block text-sm font-medium mb-1.5">Name *</label>
+            <label className="block text-sm font-medium mb-1.5">{t("common.name")} *</label>
             <input type="text" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="z. B. Urlaub"
               className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium mb-1.5">Zielbetrag (€) *</label>
+              <label className="block text-sm font-medium mb-1.5">{t("finanzen.targetAmount")} (€) *</label>
               <input type="number" min="0" step="0.01" value={form.targetAmount} onChange={(e) => setForm((f) => ({ ...f, targetAmount: e.target.value }))} placeholder="5000.00"
                 className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1.5">Bereits gespart (€)</label>
+              <label className="block text-sm font-medium mb-1.5">{t("finanzen.alreadySaved")} (€)</label>
               <input type="number" min="0" step="0.01" value={form.currentAmount} onChange={(e) => setForm((f) => ({ ...f, currentAmount: e.target.value }))} placeholder="0.00"
                 className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1.5">Zieldatum</label>
+            <label className="block text-sm font-medium mb-1.5">{t("finanzen.deadlineLabel")}</label>
             <input type="date" value={form.deadline} onChange={(e) => setForm((f) => ({ ...f, deadline: e.target.value }))}
               className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1.5">Notiz</label>
+            <label className="block text-sm font-medium mb-1.5">{t("common.note")}</label>
             <textarea rows={2} value={form.note} onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
               className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500" />
           </div>
           <div className="flex gap-2">
-            <button onClick={() => { setShowForm(false); setError(""); }} className="flex-1 py-2 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800">Abbrechen</button>
+            <button onClick={() => { setShowForm(false); setError(""); }} className="flex-1 py-2 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800">{t("common.cancel")}</button>
             <button onClick={save} disabled={saving} className="flex-1 py-2 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-60 text-white rounded-xl text-sm font-medium">
-              {saving ? "Speichere…" : "Speichern"}
+              {saving ? t("finanzen.saving") : t("common.save")}
             </button>
           </div>
         </div>
@@ -121,7 +124,7 @@ export default function SparZielePage() {
       ) : ziele.length === 0 ? (
         <div className="text-center py-20">
           <PiggyBank className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500">Noch keine Sparziele. Lege dein erstes Ziel an!</p>
+          <p className="text-gray-500">{t("finanzen.noSavingsGoals")}</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -135,7 +138,7 @@ export default function SparZielePage() {
                       <Target className="h-4 w-4 text-emerald-500" />
                       <h3 className="font-semibold text-gray-900 dark:text-white">{z.name}</h3>
                     </div>
-                    {z.deadline && <p className="text-xs text-gray-400 mt-0.5">Zieldatum: {new Date(z.deadline).toLocaleDateString("de-DE")}</p>}
+                    {z.deadline && <p className="text-xs text-gray-400 mt-0.5">{t("finanzen.deadline")}: {new Date(z.deadline).toLocaleDateString(lang)}</p>}
                   </div>
                   <button onClick={() => del(z._id)} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-950 text-red-400 hover:text-red-600 rounded-lg transition-colors">
                     <Trash2 className="h-4 w-4" />
@@ -143,8 +146,8 @@ export default function SparZielePage() {
                 </div>
                 <div className="mb-2">
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-500">{fmt(z.currentAmount)} gespart</span>
-                    <span className="font-medium text-gray-900 dark:text-white">{fmt(z.targetAmount)} Ziel</span>
+                    <span className="text-gray-500">{fmt(z.currentAmount)} {t("finanzen.savedAmount")}</span>
+                    <span className="font-medium text-gray-900 dark:text-white">{fmt(z.targetAmount)} {t("finanzen.goalAmount")}</span>
                   </div>
                   <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                     <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: `${pct}%` }} />

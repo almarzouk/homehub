@@ -22,7 +22,7 @@ export async function GET() {
   await connectDB();
 
   const users = await User.find({})
-    .select("name email role isBlocked householdId createdAt")
+    .select("name email role isBlocked isApproved householdId createdAt")
     .sort({ createdAt: -1 })
     .lean();
 
@@ -33,6 +33,7 @@ export async function GET() {
       email: u.email,
       role: u.role,
       isBlocked: u.isBlocked ?? false,
+      isApproved: u.isApproved !== false, // treat undefined (legacy) as approved
       householdId: u.householdId?.toString() ?? null,
       createdAt: u.createdAt,
     }))
@@ -45,7 +46,7 @@ export async function PATCH(req: NextRequest) {
   if (error) return error;
 
   const body = await req.json();
-  const { userId, action } = body as { userId: string; action: "block" | "unblock" | "makeAdmin" | "removeAdmin" };
+  const { userId, action } = body as { userId: string; action: "block" | "unblock" | "makeAdmin" | "removeAdmin" | "approve" | "reject" };
 
   if (!userId || !action) {
     return NextResponse.json({ error: "userId and action required" }, { status: 400 });
@@ -58,6 +59,8 @@ export async function PATCH(req: NextRequest) {
     unblock: { isBlocked: false },
     makeAdmin: { role: "admin" },
     removeAdmin: { role: "user" },
+    approve: { isApproved: true },
+    reject: { isApproved: false },
   };
 
   if (!updateMap[action]) {

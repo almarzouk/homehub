@@ -1,28 +1,31 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Users,
   ShieldCheck,
   ShieldOff,
-  Trash2,
-  Crown,
-  UserX,
   UserCheck,
-  Search,
   RefreshCw,
   AlertTriangle,
+  Building2,
+  TrendingUp,
+  Clock,
+  ChevronRight,
+  CheckCircle2,
+  XCircle,
+  ArrowRight,
 } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-interface AdminUser {
+interface PendingUser {
   _id: string;
   name: string;
   email: string;
-  role: "admin" | "user";
-  isBlocked: boolean;
-  householdId: string | null;
   createdAt: string;
+  householdId: string | null;
 }
 
 interface Stats {
@@ -30,47 +33,48 @@ interface Stats {
   blockedUsers: number;
   adminUsers: number;
   newUsersToday: number;
+  totalHouseholds: number;
+  pendingApprovals: number;
 }
 
 export default function AdminPage() {
-  const router = useRouter();
-  const [users, setUsers] = useState<AdminUser[]>([]);
+  const { t } = useTranslation();
+  const { lang } = useLanguage();
   const [stats, setStats] = useState<Stats | null>(null);
+  const [pending, setPending] = useState<PendingUser[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [error, setError] = useState("");
-  const [confirmDelete, setConfirmDelete] = useState<AdminUser | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
     try {
-      const [usersRes, statsRes] = await Promise.all([
-        fetch("/api/admin/users"),
-        fetch("/api/admin/stats"),
+      const [statsRes, usersRes] = await Promise.all([
+        fetch("/api/admin/stats", { signal: controller.signal }),
+        fetch("/api/admin/users", { signal: controller.signal }),
       ]);
-
-      if (usersRes.status === 403 || statsRes.status === 403) {
-        router.push("/");
-        return;
+      clearTimeout(timeout);
+      if (statsRes.ok) setStats(await statsRes.json());
+      else if (statsRes.status === 403) { setError(t("admin.accessDenied")); return; }
+      if (usersRes.ok) {
+        const all = await usersRes.json();
+        if (Array.isArray(all)) {
+          setPending(all.filter((u: PendingUser & { isApproved: boolean }) => u.isApproved === false));
+        }
       }
+    } catch (e) {
+      clearTimeout(timeout);
+      const msg = e instanceof Error && e.name === "AbortError"
+        ? "Request timed out — check server / database connection"
+        : t("common.error");
+      setError(msg);
+    } finally { setLoading(false); }
+  }, [t]);
 
-      const usersData = await usersRes.json();
-      const statsData = await statsRes.json();
-
-      if (Array.isArray(usersData)) setUsers(usersData);
-      if (statsData.totalUsers !== undefined) setStats(statsData);
-    } catch {
-      setError("Failed to load admin data.");
-    } finally {
-      setLoading(false);
-    }
-  }, [router]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  useEffect(() => { load(); }, [load]);
 
   const doAction = async (userId: string, action: string) => {
     setActionLoading(userId + action);
@@ -81,204 +85,177 @@ export default function AdminPage() {
         body: JSON.stringify({ userId, action }),
       });
       if (res.ok) await load();
-    } finally {
-      setActionLoading(null);
-    }
+    } finally { setActionLoading(null); }
   };
 
-  const doDelete = async (userId: string) => {
-    setActionLoading(userId + "delete");
-    setConfirmDelete(null);
-    try {
-      const res = await fetch(`/api/admin/users?userId=${userId}`, { method: "DELETE" });
-      if (res.ok) await load();
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
-  const filtered = users.filter(
-    (u) =>
-      u.name.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase())
-  );
+  const statCards = stats
+    ? [
+        { label: t("admin.totalUsers"), value: stats.totalUsers, icon: Users, color: "text-blue-400", bg: "bg-blue-500/10 border-blue-500/20", href: "/admin/users" },
+        { label: t("admin.totalHouseholds"), value: stats.totalHouseholds ?? 0, icon: Building2, color: "text-green-400", bg: "bg-green-500/10 border-green-500/20", href: "/admin/households" },
+        { label: t("admin.blocked"), value: stats.blockedUsers, icon: ShieldOff, color: "text-red-400", bg: "bg-red-500/10 border-red-500/20", href: "/admin/users" },
+        { label: t("admin.pendingApprovals"), value: stats.pendingApprovals ?? 0, icon: Clock, color: "text-orange-400", bg: "bg-orange-500/10 border-orange-500/20", href: "#pending" },
+        { label: "New Today", value: stats.newUsersToday, icon: TrendingUp, color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20", href: "/admin/users" },
+        { label: "Admins", value: stats.adminUsers, icon: ShieldCheck, color: "text-yellow-400", bg: "bg-yellow-500/10 border-yellow-500/20", href: "/admin/users" },
+      ]
+    : [];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 p-4 space-y-6">
+    <div className="space-y-8 max-w-7xl">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <ShieldCheck className="h-6 w-6 text-blue-500" />
-            Admin Panel
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+            <ShieldCheck className="h-6 w-6 text-red-400" />
+            {t("admin.overview")}
           </h1>
-          <p className="text-sm text-gray-500 mt-0.5">Manage users and website activity</p>
+          <p className="text-sm text-gray-400 mt-0.5">{t("admin.title")}</p>
         </div>
         <button
           onClick={load}
           disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-800 border border-gray-700 text-sm font-medium text-gray-300 hover:bg-gray-700 transition-colors"
         >
           <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-          Refresh
+          {t("common.refresh")}
         </button>
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 p-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-xl text-red-700 dark:text-red-300 text-sm">
-          <AlertTriangle className="h-4 w-4 flex-shrink-0" />
-          {error}
+        <div className="flex items-center gap-2 p-4 bg-red-950/50 border border-red-800 rounded-xl text-red-400 text-sm">
+          <AlertTriangle className="h-4 w-4 flex-shrink-0" />{error}
         </div>
       )}
 
-      {/* Stats Cards */}
-      {stats && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            { label: "Total Users", value: stats.totalUsers, icon: Users, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-950" },
-            { label: "Admins", value: stats.adminUsers, icon: Crown, color: "text-yellow-500", bg: "bg-yellow-50 dark:bg-yellow-950" },
-            { label: "Blocked", value: stats.blockedUsers, icon: UserX, color: "text-red-500", bg: "bg-red-50 dark:bg-red-950" },
-            { label: "New Today", value: stats.newUsersToday, icon: UserCheck, color: "text-green-500", bg: "bg-green-50 dark:bg-green-950" },
-          ].map((s) => (
-            <div key={s.label} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-xl ${s.bg} flex items-center justify-center flex-shrink-0`}>
-                <s.icon className={`h-5 w-5 ${s.color}`} />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{s.value}</p>
-                <p className="text-xs text-gray-400">{s.label}</p>
-              </div>
-            </div>
-          ))}
+      {/* Stats Grid */}
+      {loading ? (
+        <div className="flex justify-center py-16">
+          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
         </div>
-      )}
-
-      {/* Users Table */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
-        <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
-          <Search className="h-4 w-4 text-gray-400 flex-shrink-0" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search users by name or email…"
-            className="flex-1 bg-transparent text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none"
-          />
-          <span className="text-xs text-gray-400">{filtered.length} users</span>
-        </div>
-
-        {loading ? (
-          <div className="flex justify-center py-16">
-            <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          </div>
-        ) : filtered.length === 0 ? (
-          <p className="text-center text-gray-400 py-12">No users found.</p>
-        ) : (
-          <div className="divide-y divide-gray-100 dark:divide-gray-800">
-            {filtered.map((user) => (
-              <div key={user._id} className="flex items-center gap-3 p-4">
-                {/* Avatar */}
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 ${
-                  user.role === "admin" ? "bg-gradient-to-br from-yellow-400 to-orange-500" : "bg-gradient-to-br from-blue-500 to-indigo-600"
-                }`}>
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{user.name}</p>
-                    {user.role === "admin" && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300">
-                        <Crown className="h-3 w-3" /> Admin
-                      </span>
-                    )}
-                    {user.isBlocked && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300">
-                        <ShieldOff className="h-3 w-3" /> Blocked
-                      </span>
-                    )}
+      ) : (
+        <>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {statCards.map((s) => (
+              <Link
+                key={s.label}
+                href={s.href}
+                className={`rounded-2xl border p-4 flex flex-col gap-2 hover:scale-105 transition-transform cursor-pointer ${s.bg}`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="w-9 h-9 rounded-xl bg-gray-800 flex items-center justify-center">
+                    <s.icon className={`h-4 w-4 ${s.color}`} />
                   </div>
-                  <p className="text-xs text-gray-400 truncate">{user.email}</p>
-                  <p className="text-xs text-gray-300 dark:text-gray-600">
-                    Joined {new Date(user.createdAt).toLocaleDateString()} · Household: {user.householdId ?? "none"}
-                  </p>
+                  <ChevronRight className="h-3.5 w-3.5 text-gray-600" />
                 </div>
-
-                {/* Actions */}
-                <div className="flex items-center gap-1.5 flex-shrink-0">
-                  {/* Block / Unblock */}
-                  <button
-                    onClick={() => doAction(user._id, user.isBlocked ? "unblock" : "block")}
-                    disabled={!!actionLoading}
-                    title={user.isBlocked ? "Unblock user" : "Block user"}
-                    className={`p-2 rounded-lg transition-colors ${
-                      user.isBlocked
-                        ? "bg-green-50 dark:bg-green-950 text-green-600 hover:bg-green-100"
-                        : "bg-red-50 dark:bg-red-950 text-red-500 hover:bg-red-100"
-                    }`}
-                  >
-                    {user.isBlocked ? <UserCheck className="h-4 w-4" /> : <UserX className="h-4 w-4" />}
-                  </button>
-
-                  {/* Make Admin / Remove Admin */}
-                  <button
-                    onClick={() => doAction(user._id, user.role === "admin" ? "removeAdmin" : "makeAdmin")}
-                    disabled={!!actionLoading}
-                    title={user.role === "admin" ? "Remove admin role" : "Make admin"}
-                    className="p-2 rounded-lg bg-yellow-50 dark:bg-yellow-950 text-yellow-600 hover:bg-yellow-100 transition-colors"
-                  >
-                    <Crown className="h-4 w-4" />
-                  </button>
-
-                  {/* Delete */}
-                  <button
-                    onClick={() => setConfirmDelete(user)}
-                    disabled={!!actionLoading}
-                    title="Delete user"
-                    className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
+                <p className="text-2xl font-bold text-white">{s.value}</p>
+                <p className="text-xs text-gray-400 leading-tight">{s.label}</p>
+              </Link>
             ))}
           </div>
-        )}
-      </div>
 
-      {/* Delete Confirmation Modal */}
-      {confirmDelete && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="w-full max-w-sm bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-xl space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-950 flex items-center justify-center">
-                <AlertTriangle className="h-5 w-5 text-red-600" />
+          {/* Pending Approvals */}
+          <div id="pending" className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
+            <div className="flex items-center justify-between p-5 border-b border-gray-800">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
+                  <Clock className="h-5 w-5 text-orange-400" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-white">{t("admin.pendingApprovals")}</h2>
+                  <p className="text-xs text-gray-400">
+                    {pending.length} {pending.length === 1 ? "account" : "accounts"} waiting
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-bold text-gray-900 dark:text-white">Delete User?</h3>
-                <p className="text-sm text-gray-500">This cannot be undone.</p>
+              {pending.length > 0 && (
+                <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-orange-500 text-white text-xs font-bold">
+                  {pending.length}
+                </span>
+              )}
+            </div>
+
+            {pending.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-14 text-center">
+                <div className="w-14 h-14 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center mb-4">
+                  <UserCheck className="h-7 w-7 text-green-400" />
+                </div>
+                <p className="text-white font-medium">{t("admin.approved")}</p>
+                <p className="text-sm text-gray-500 mt-1">No accounts awaiting approval</p>
               </div>
-            </div>
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              Are you sure you want to delete <strong>{confirmDelete.name}</strong> ({confirmDelete.email})?
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setConfirmDelete(null)}
-                className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => doDelete(confirmDelete._id)}
-                className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-sm font-medium hover:bg-red-600 transition-colors"
-              >
-                Delete
-              </button>
-            </div>
+            ) : (
+              <div className="divide-y divide-gray-800">
+                {pending.map((user) => (
+                  <div key={user._id} className="flex items-center gap-4 p-4 hover:bg-gray-800/40 transition-colors">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-white">{user.name}</p>
+                      <p className="text-xs text-gray-400 truncate">{user.email}</p>
+                      <p className="text-xs text-gray-600 mt-0.5">
+                        {t("admin.joined")}: {new Date(user.createdAt).toLocaleDateString(lang)}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <button
+                        onClick={() => doAction(user._id, "approve")}
+                        disabled={!!actionLoading}
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-xs font-semibold transition-colors"
+                      >
+                        <CheckCircle2 className="h-4 w-4" />
+                        {t("admin.approve")}
+                      </button>
+                      <button
+                        onClick={() => doAction(user._id, "reject")}
+                        disabled={!!actionLoading}
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-900/60 hover:bg-red-900/90 disabled:opacity-50 text-red-400 text-xs font-semibold transition-colors border border-red-800/60"
+                      >
+                        <XCircle className="h-4 w-4" />
+                        {t("admin.reject")}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
+
+          {/* Quick Links */}
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Link
+              href="/admin/users"
+              className="group flex items-center justify-between p-5 rounded-2xl bg-gray-900 border border-gray-800 hover:border-blue-700/60 hover:bg-gray-800/60 transition-all"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                  <Users className="h-6 w-6 text-blue-400" />
+                </div>
+                <div>
+                  <p className="font-semibold text-white">{t("admin.users")}</p>
+                  <p className="text-sm text-gray-400">
+                    {stats?.totalUsers ?? 0} total · {stats?.blockedUsers ?? 0} blocked
+                  </p>
+                </div>
+              </div>
+              <ArrowRight className="h-5 w-5 text-gray-600 group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
+            </Link>
+
+            <Link
+              href="/admin/households"
+              className="group flex items-center justify-between p-5 rounded-2xl bg-gray-900 border border-gray-800 hover:border-green-700/60 hover:bg-gray-800/60 transition-all"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+                  <Building2 className="h-6 w-6 text-green-400" />
+                </div>
+                <div>
+                  <p className="font-semibold text-white">{t("admin.households")}</p>
+                  <p className="text-sm text-gray-400">{stats?.totalHouseholds ?? 0} total</p>
+                </div>
+              </div>
+              <ArrowRight className="h-5 w-5 text-gray-600 group-hover:text-green-400 group-hover:translate-x-1 transition-all" />
+            </Link>
+          </div>
+        </>
       )}
     </div>
   );

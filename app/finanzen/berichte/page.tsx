@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { FileBarChart, TrendingUp, TrendingDown, DollarSign } from "lucide-react";
 
 interface Expense { _id: string; amount: number; category: string; type: string; date: string; description?: string; }
@@ -15,6 +16,8 @@ function fmt(cents: number) {
 }
 
 export default function BerichtePage() {
+  const { t } = useTranslation();
+  const { lang } = useLanguage();
   const [month, setMonth] = useState(getMonthKey());
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,7 +38,7 @@ export default function BerichtePage() {
   expenses.forEach((e) => { byType[e.type] = (byType[e.type] ?? 0) + e.amount; });
 
   const [y, mo] = month.split("-");
-  const monthLabel = new Date(parseInt(y), parseInt(mo) - 1).toLocaleDateString("de-DE", { month: "long", year: "numeric" });
+  const monthLabel = new Date(parseInt(y), parseInt(mo) - 1).toLocaleDateString(lang, { month: "long", year: "numeric" });
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -44,13 +47,13 @@ export default function BerichtePage() {
           <FileBarChart className="h-5 w-5 text-purple-600" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Berichte</h1>
-          <p className="text-sm text-gray-500">Ausgabenanalyse</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("finanzen.reports")}</h1>
+          <p className="text-sm text-gray-500">{t("finanzen.expenseAnalysis")}</p>
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Monat</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t("finanzen.month")}</label>
         <input type="month" value={month} onChange={(e) => setMonth(e.target.value)}
           className="px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" />
       </div>
@@ -63,10 +66,10 @@ export default function BerichtePage() {
             <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5">
               <div className="flex items-center gap-2 mb-2 text-gray-500"><DollarSign className="h-4 w-4" /><span className="text-xs">{monthLabel}</span></div>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">{fmt(total)}</p>
-              <p className="text-xs text-gray-400">{expenses.length} Buchungen</p>
+              <p className="text-xs text-gray-400">{expenses.length} {t("finanzen.entries")}</p>
             </div>
             <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5">
-              <div className="flex items-center gap-2 mb-2 text-gray-500"><TrendingDown className="h-4 w-4" /><span className="text-xs">Ausgabentypen</span></div>
+              <div className="flex items-center gap-2 mb-2 text-gray-500"><TrendingDown className="h-4 w-4" /><span className="text-xs">{t("finanzen.expenseTypes")}</span></div>
               {Object.entries(byType).map(([t, a]) => (
                 <div key={t} className="flex justify-between text-sm">
                   <span className="text-gray-500 capitalize">{t}</span>
@@ -80,7 +83,7 @@ export default function BerichtePage() {
             <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
               <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-800 font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-purple-500" />
-                Nach Kategorie
+                {t("finanzen.byCategory")}
               </div>
               <div className="divide-y divide-gray-50 dark:divide-gray-800">
                 {sortedCats.map(([cat, amount]) => {
@@ -102,7 +105,7 @@ export default function BerichtePage() {
           )}
 
           {expenses.length === 0 && (
-            <div className="text-center py-12 text-gray-500">Keine Ausgaben für {monthLabel}.</div>
+            <div className="text-center py-12 text-gray-500">{t("finanzen.noExpenses")} {monthLabel}.</div>
           )}
         </div>
       )}

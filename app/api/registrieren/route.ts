@@ -55,6 +55,7 @@ export async function POST(request: NextRequest) {
       email: email.toLowerCase().trim(),
       password: hashedPassword,
       role: "user",
+      isApproved: false,
       householdId: household._id,
     });
 

@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Plus, Search, AlertTriangle, Package } from "lucide-react";
 
 interface Product {
@@ -57,7 +58,10 @@ function ProductImage({ image, barcode, name }: { image?: string | null; barcode
   );
 }
 
-export default function VorratPage() {  const [products, setProducts] = useState<Product[]>([]);
+export default function VorratPage() {
+  const { t } = useTranslation();
+  const { lang } = useLanguage();
+  const [products, setProducts] = useState<Product[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -96,17 +100,17 @@ export default function VorratPage() {  const [products, setProducts] = useState
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Vorrat</h1>
-          <p className="text-sm text-gray-500">{total} Produkte</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("vorrat.title")}</h1>
+          <p className="text-sm text-gray-500">{total} {t("vorrat.products")}</p>
         </div>
         <div className="flex gap-2">
           <Link href="/warnungen" className="flex items-center gap-1.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 px-3 py-2 rounded-xl text-sm font-medium hover:shadow-sm transition-shadow">
             <AlertTriangle className="h-4 w-4 text-orange-500" />
-            Warnungen
+            {t("vorrat.warnings")}
           </Link>
           <Link href="/vorrat/neu" className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
             <Plus className="h-4 w-4" />
-            Hinzufügen
+            {t("common.add")}
           </Link>
         </div>
       </div>
@@ -115,7 +119,7 @@ export default function VorratPage() {  const [products, setProducts] = useState
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
         <input
           type="text"
-          placeholder="Produkte suchen…"
+          placeholder={t("common.search")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -129,18 +133,18 @@ export default function VorratPage() {  const [products, setProducts] = useState
       ) : products.length === 0 ? (
         <div className="text-center py-20">
           <Package className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500">{search ? "Keine Produkte gefunden." : "Noch keine Produkte."}</p>
+          <p className="text-gray-500">{search ? t("vorrat.noProductsFound") : t("vorrat.noProductsYet")}</p>
         </div>
       ) : (
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 dark:border-gray-800 text-left">
-                <th className="px-4 py-3 font-medium text-gray-500">Produkt</th>
-                <th className="px-4 py-3 font-medium text-gray-500 text-right">Menge</th>
-                <th className="px-4 py-3 font-medium text-gray-500 hidden sm:table-cell">Kategorie</th>
-                <th className="px-4 py-3 font-medium text-gray-500 hidden md:table-cell">Ort</th>
-                <th className="px-4 py-3 font-medium text-gray-500 hidden md:table-cell">MHD</th>
+                <th className="px-4 py-3 font-medium text-gray-500">{t("common.name")}</th>
+                <th className="px-4 py-3 font-medium text-gray-500 text-right">{t("vorrat.quantity")}</th>
+                <th className="px-4 py-3 font-medium text-gray-500 hidden sm:table-cell">{t("common.category")}</th>
+                <th className="px-4 py-3 font-medium text-gray-500 hidden md:table-cell">{t("vorrat.location")}</th>
+                <th className="px-4 py-3 font-medium text-gray-500 hidden md:table-cell">{t("vorrat.expiryDate")}</th>
               </tr>
             </thead>
             <tbody>
@@ -170,7 +174,7 @@ export default function VorratPage() {  const [products, setProducts] = useState
                   </td>
                   <td className="px-4 py-3 hidden md:table-cell text-gray-500">{p.location ?? "—"}</td>
                   <td className="px-4 py-3 hidden md:table-cell text-gray-500">
-                    {p.expiryDate ? new Date(p.expiryDate).toLocaleDateString("de-DE") : "—"}
+                    {p.expiryDate ? new Date(p.expiryDate).toLocaleDateString(lang) : "—"}
                   </td>
                 </tr>
               ))}
@@ -181,9 +185,9 @@ export default function VorratPage() {  const [products, setProducts] = useState
 
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2">
-          <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="px-3 py-1.5 rounded-lg border text-sm disabled:opacity-40">Zurück</button>
+          <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="px-3 py-1.5 rounded-lg border text-sm disabled:opacity-40">{t("common.previous")}</button>
           <span className="text-sm text-gray-500">{page} / {totalPages}</span>
-          <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="px-3 py-1.5 rounded-lg border text-sm disabled:opacity-40">Weiter</button>
+          <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="px-3 py-1.5 rounded-lg border text-sm disabled:opacity-40">{t("common.next")}</button>
         </div>
       )}
     </div>

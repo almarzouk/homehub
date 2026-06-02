@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { TrendingUp, TrendingDown, Minus, RefreshCw } from "lucide-react";
 
 interface Movement {
@@ -13,6 +15,8 @@ interface Movement {
 }
 
 export default function BewegungsPage() {
+  const { t } = useTranslation();
+  const { lang } = useLanguage();
   const [movements, setMovements] = useState<Movement[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -32,15 +36,19 @@ export default function BewegungsPage() {
     return <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-950 flex items-center justify-center"><Minus className="h-4 w-4 text-blue-600" /></div>;
   };
 
-  const typeLabel = (t: string) => t === "IN" ? "Eingang" : t === "OUT" ? "Ausgang" : "Anpassung";
-  const UNIT_LABELS: Record<string, string> = { piece: "Stück", kg: "kg", g: "g", liter: "Liter", ml: "ml", box: "Karton", pack: "Packung" };
+  const typeLabel = (type: string) => type === "IN" ? t("vorrat.in") : type === "OUT" ? t("vorrat.out") : t("vorrat.adjust");
+  const UNIT_LABELS: Record<string, string> = {
+    piece: t("vorrat.units.piece"), kg: "kg", g: "g",
+    liter: t("vorrat.units.liter"), ml: "ml",
+    box: t("vorrat.units.box"), pack: t("vorrat.units.pack"),
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Bewegungen</h1>
-          <p className="text-sm text-gray-500">Lagerein- und -ausgänge</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("vorrat.movementsTitle")}</h1>
+          <p className="text-sm text-gray-500">{t("vorrat.movementsSubtitle")}</p>
         </div>
         <button onClick={load} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500">
           <RefreshCw className="h-5 w-5" />
@@ -50,7 +58,7 @@ export default function BewegungsPage() {
       {loading ? (
         <div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>
       ) : movements.length === 0 ? (
-        <div className="text-center py-20 text-gray-500">Noch keine Bewegungen erfasst.</div>
+        <div className="text-center py-20 text-gray-500">{t("vorrat.noMovements")}</div>
       ) : (
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 divide-y divide-gray-50 dark:divide-gray-800">
           {movements.map((m) => (
@@ -58,10 +66,10 @@ export default function BewegungsPage() {
               <TypeIcon type={m.type} />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                  {m.productId?.name ?? "Unbekanntes Produkt"}
+                  {m.productId?.name ?? t("vorrat.unknownProduct")}
                 </p>
                 <p className="text-xs text-gray-400">
-                  {typeLabel(m.type)} · {new Date(m.createdAt).toLocaleString("de-DE", { dateStyle: "short", timeStyle: "short" })}
+                  {typeLabel(m.type)} · {new Date(m.createdAt).toLocaleString(lang, { dateStyle: "short", timeStyle: "short" })}
                   {m.note ? ` · ${m.note}` : ""}
                 </p>
               </div>

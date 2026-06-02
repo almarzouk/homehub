@@ -11,7 +11,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t } = useTranslation();
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const error = searchParams.get("error");
 
   const [email, setEmail] = useState("");
@@ -53,15 +53,14 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-200">
-            <Home className="h-8 w-8 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">HomeHub</h1>
-          <p className="text-gray-500 mt-1 text-sm">{t("nav.sections.kueche")} · {t("nav.sections.vorrat")} · {t("nav.sections.finanzen")}</p>
+    <div className="w-full max-w-md">
+      <div className="text-center mb-8">
+        <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-200">
+          <Home className="h-8 w-8 text-white" />
         </div>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">HomeHub</h1>
+        <p className="text-gray-500 mt-1 text-sm">{t("auth.loginTagline")}</p>
+      </div>
 
         <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 p-8">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">{t("auth.login")}</h2>
@@ -85,7 +84,7 @@ function LoginForm() {
                 required
                 autoComplete="email"
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                placeholder="ihre@email.de"
+                placeholder={t("auth.emailPlaceholder")}
               />
             </div>
 
@@ -130,7 +129,6 @@ function LoginForm() {
             </Link>
           </p>
         </div>
-      </div>
     </div>
   );
 }

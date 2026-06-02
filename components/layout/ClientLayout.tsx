@@ -4,15 +4,33 @@ import { usePathname } from "next/navigation";
 import Sidebar from "./Sidebar";
 import MobileNav from "./MobileNav";
 import SessionProvider from "./SessionProvider";
+import PublicNav from "./PublicNav";
 
-const AUTH_PATHS = ["/anmelden", "/einrichten"];
+// These paths get full public header+footer (no auth required)
+const PUBLIC_NAV_PATHS = ["/anmelden", "/registrieren", "/einrichten"];
+// These paths have their own complete layout (no wrapper at all)
+const BARE_PUBLIC_PATHS = ["/landing"];
+// Root `/` is the landing page — it has its own header/footer built in
+const ROOT_PUBLIC = "/";
+// These paths get SessionProvider only (own layout, no user sidebar)
+const STANDALONE_PATHS = ["/admin"];
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isAuthPage = AUTH_PATHS.some((p) => pathname.startsWith(p));
+  const isBarePublic = BARE_PUBLIC_PATHS.some((p) => pathname.startsWith(p)) || pathname === ROOT_PUBLIC;
+  const isPublicNav = PUBLIC_NAV_PATHS.some((p) => pathname.startsWith(p));
+  const isStandalone = STANDALONE_PATHS.some((p) => pathname.startsWith(p));
 
-  if (isAuthPage) {
-    return <>{children}</>;
+  if (isBarePublic) {
+    return <SessionProvider>{children}</SessionProvider>;
+  }
+
+  if (isPublicNav) {
+    return <SessionProvider><PublicNav>{children}</PublicNav></SessionProvider>;
+  }
+
+  if (isStandalone) {
+    return <SessionProvider>{children}</SessionProvider>;
   }
 
   return (

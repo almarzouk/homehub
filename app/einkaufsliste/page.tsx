@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { ShoppingCart, RefreshCw, Plus } from "lucide-react";
 
 interface Product {
@@ -14,9 +15,10 @@ interface Product {
   categoryId?: { _id: string; name: string; color: string } | null;
 }
 
-const UNIT_LABELS: Record<string, string> = { piece: "Stück", kg: "kg", g: "g", liter: "Liter", ml: "ml", box: "Karton", pack: "Packung" };
+const UNIT_KEYS = ["piece", "kg", "g", "liter", "ml", "box", "pack"] as const;
 
 export default function EinkaufslistePage() {
+  const { t } = useTranslation();
   const [items, setItems] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
@@ -47,18 +49,20 @@ export default function EinkaufslistePage() {
     setItems((prev) => prev.filter((p) => p._id !== id));
   };
 
+  const unitLabel = (unit: string) => unit === "piece" ? t("vorrat.units.piece") : unit === "liter" ? t("vorrat.units.liter") : unit === "box" ? t("vorrat.units.box") : unit === "pack" ? t("vorrat.units.pack") : unit;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Einkaufsliste</h1>
-          <p className="text-sm text-gray-500">{items.length} Artikel</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("vorrat.shopping.title")}</h1>
+          <p className="text-sm text-gray-500">{items.length} {t("vorrat.shopping.items")}</p>
         </div>
         <div className="flex gap-2">
           <button onClick={autoAdd} disabled={adding}
             className="flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 rounded-xl text-sm hover:shadow-sm transition-all disabled:opacity-60">
             <Plus className="h-4 w-4" />
-            Niedrige Bestände
+            {t("vorrat.shopping.addLowStock")}
           </button>
           <button onClick={load} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500">
             <RefreshCw className="h-4 w-4" />
@@ -71,9 +75,9 @@ export default function EinkaufslistePage() {
       ) : items.length === 0 ? (
         <div className="text-center py-20">
           <ShoppingCart className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500 mb-4">Die Einkaufsliste ist leer.</p>
+          <p className="text-gray-500 mb-4">{t("vorrat.shopping.emptyList")}</p>
           <button onClick={autoAdd} className="px-4 py-2 bg-blue-500 text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors">
-            Niedrige Bestände hinzufügen
+            {t("vorrat.shopping.addLowStock")}
           </button>
         </div>
       ) : (
@@ -85,13 +89,13 @@ export default function EinkaufslistePage() {
                   {p.name}
                 </Link>
                 <p className="text-xs text-gray-400">
-                  Noch: {p.quantity} {UNIT_LABELS[p.unit] ?? p.unit} · Min: {p.minQuantity}
+                  {t("vorrat.shopping.still")} {p.quantity} {unitLabel(p.unit)} · {t("vorrat.shopping.min")} {p.minQuantity}
                   {p.categoryId && ` · ${p.categoryId.name}`}
                 </p>
               </div>
               <button onClick={() => removeFromList(p._id)}
                 className="text-xs px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors">
-                Entfernen
+                {t("vorrat.shopping.remove")}
               </button>
             </div>
           ))}

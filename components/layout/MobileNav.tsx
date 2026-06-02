@@ -107,7 +107,7 @@ export default function MobileNav() {
     <>
       {/* Top bar — mobile only */}
       <header className="md:hidden fixed top-0 inset-x-0 z-40 h-14 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/dashboard" className="flex items-center gap-2">
           <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
             <Home className="h-4 w-4 text-white" />
           </div>
@@ -168,15 +168,15 @@ export default function MobileNav() {
         {/* Dashboard link */}
         <div className="px-3 pt-3">
           <Link
-            href="/"
+            href="/dashboard"
             className={cn(
               "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-              pathname === "/"
+              pathname === "/dashboard"
                 ? "bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300"
                 : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
             )}
           >
-            <LayoutDashboard className={cn("h-5 w-5", pathname === "/" ? "text-indigo-600" : "text-gray-400")} />
+            <LayoutDashboard className={cn("h-5 w-5", pathname === "/dashboard" ? "text-indigo-600" : "text-gray-400")} />
             {t("nav.dashboard")}
           </Link>
         </div>

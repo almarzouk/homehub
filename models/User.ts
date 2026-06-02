@@ -6,6 +6,7 @@ export interface IUserDocument extends Document {
   password: string;
   role: "admin" | "user";
   isBlocked: boolean;
+  isApproved: boolean;
   householdId?: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -18,6 +19,7 @@ const UserSchema = new Schema<IUserDocument>(
     password: { type: String, required: true },
     role: { type: String, enum: ["admin", "user"], default: "user" },
     isBlocked: { type: Boolean, default: false },
+    isApproved: { type: Boolean, default: true },
     householdId: { type: Schema.Types.ObjectId, ref: "Household", index: true },
   },
   { timestamps: true }

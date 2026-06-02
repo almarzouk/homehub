@@ -36,16 +36,16 @@ export default function KuecheStatistikPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Statistiken</h1>
-        <p className="text-sm text-gray-500">Überblick der Küchen-Aktivität</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("kueche.statistics.title")}</h1>
+        <p className="text-sm text-gray-500">{t("kueche.statistics.overview")}</p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: "Gerichte gesamt", value: gerichte.length, icon: <ChefHat className="h-5 w-5 text-orange-500" /> },
+          { label: t("kueche.statistics.totalRecipes"), value: gerichte.length, icon: <ChefHat className="h-5 w-5 text-orange-500" /> },
           { label: t("kueche.statistics.favorites"), value: favoriten, icon: <Star className="h-5 w-5 text-yellow-500" /> },
-          { label: "Ø Kochzeit", value: avgZeit ? `${avgZeit} Min.` : "—", icon: <Clock className="h-5 w-5 text-blue-500" /> },
-          { label: "Insgesamt gekocht", value: totalGekocht, icon: <BarChart3 className="h-5 w-5 text-green-500" /> },
+          { label: t("kueche.statistics.avgCookTime"), value: avgZeit ? `${avgZeit} ${t("kueche.statistics.minutes")}` : "—", icon: <Clock className="h-5 w-5 text-blue-500" /> },
+          { label: t("kueche.statistics.totalCooked"), value: totalGekocht, icon: <BarChart3 className="h-5 w-5 text-green-500" /> },
         ].map((s) => (
           <div key={s.label} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4">
             <div className="flex items-center gap-2 mb-2">{s.icon}<span className="text-xs text-gray-500">{s.label}</span></div>
@@ -57,7 +57,7 @@ export default function KuecheStatistikPage() {
       {topGerichte.length > 0 && (
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
           <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-800 font-semibold text-gray-900 dark:text-white">
-            Am häufigsten gekocht
+            {t("kueche.statistics.mostCooked")}
           </div>
           <div className="divide-y divide-gray-50 dark:divide-gray-800">
             {topGerichte.map((g, i) => (

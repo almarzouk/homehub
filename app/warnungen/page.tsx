@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useLanguage } from "@/contexts/LanguageContext";
 import Link from "next/link";
 import { AlertTriangle, PackageX, TrendingDown, Clock, Calendar } from "lucide-react";
 
@@ -22,6 +23,8 @@ interface Alerts {
 }
 
 export default function WarnungenPage() {
+  const { t } = useTranslation();
+  const { lang } = useLanguage();
   const [alerts, setAlerts] = useState<Alerts>({ outOfStock: [], lowStock: [], expired: [], expiringSoon: [] });
   const [loading, setLoading] = useState(true);
 
@@ -42,8 +45,8 @@ export default function WarnungenPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Warnungen</h1>
-        <p className="text-sm text-gray-500">{total} Produkte benötigen Aufmerksamkeit</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("vorrat.warnings")}</h1>
+        <p className="text-sm text-gray-500">{total} {t("vorrat.warningProducts")}</p>
       </div>
 
       {total === 0 && (
@@ -51,38 +54,38 @@ export default function WarnungenPage() {
           <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-950 flex items-center justify-center mx-auto mb-4">
             <AlertTriangle className="h-8 w-8 text-green-500" />
           </div>
-          <p className="text-gray-500">Alles in Ordnung! Keine Warnungen.</p>
+          <p className="text-gray-500">{t("vorrat.noWarnings")}</p>
         </div>
       )}
 
       {alerts.outOfStock.length > 0 && (
-        <Section title="Nicht vorrätig" color="red" icon={<PackageX className="h-5 w-5" />} count={alerts.outOfStock.length}>
+        <Section title={t("vorrat.warningTypes.outOfStock")} color="red" icon={<PackageX className="h-5 w-5" />} count={alerts.outOfStock.length}>
           {alerts.outOfStock.map((p) => (
-            <ProductRow key={p._id} p={p} />
+            <ProductRow key={p._id} p={p} lang={lang} />
           ))}
         </Section>
       )}
 
       {alerts.expired.length > 0 && (
-        <Section title="Abgelaufen" color="red" icon={<Calendar className="h-5 w-5" />} count={alerts.expired.length}>
+        <Section title={t("vorrat.warningTypes.expired")} color="red" icon={<Calendar className="h-5 w-5" />} count={alerts.expired.length}>
           {alerts.expired.map((p) => (
-            <ProductRow key={p._id} p={p} showExpiry />
+            <ProductRow key={p._id} p={p} showExpiry lang={lang} />
           ))}
         </Section>
       )}
 
       {alerts.lowStock.length > 0 && (
-        <Section title="Niedriger Bestand" color="yellow" icon={<TrendingDown className="h-5 w-5" />} count={alerts.lowStock.length}>
+        <Section title={t("vorrat.warningTypes.lowStock")} color="yellow" icon={<TrendingDown className="h-5 w-5" />} count={alerts.lowStock.length}>
           {alerts.lowStock.map((p) => (
-            <ProductRow key={p._id} p={p} />
+            <ProductRow key={p._id} p={p} lang={lang} />
           ))}
         </Section>
       )}
 
       {alerts.expiringSoon.length > 0 && (
-        <Section title="Läuft bald ab" color="orange" icon={<Clock className="h-5 w-5" />} count={alerts.expiringSoon.length}>
+        <Section title={t("vorrat.warningTypes.expiringSoon")} color="orange" icon={<Clock className="h-5 w-5" />} count={alerts.expiringSoon.length}>
           {alerts.expiringSoon.map((p) => (
-            <ProductRow key={p._id} p={p} showExpiry />
+            <ProductRow key={p._id} p={p} showExpiry lang={lang} />
           ))}
         </Section>
       )}
@@ -110,13 +113,18 @@ function Section({ title, color, icon, count, children }: {
   );
 }
 
-function ProductRow({ p, showExpiry }: { p: AlertProduct; showExpiry?: boolean }) {
-  const UNIT_LABELS: Record<string, string> = { piece: "Stück", kg: "kg", g: "g", liter: "Liter", ml: "ml", box: "Karton", pack: "Packung" };
+function ProductRow({ p, showExpiry, lang }: { p: AlertProduct; showExpiry?: boolean; lang: string }) {
+  const { t } = useTranslation();
+  const UNIT_LABELS: Record<string, string> = {
+    piece: t("vorrat.units.piece"), kg: "kg", g: "g",
+    liter: t("vorrat.units.liter"), ml: "ml",
+    box: t("vorrat.units.box"), pack: t("vorrat.units.pack"),
+  };
   return (
     <Link href={`/vorrat/${p._id}`} className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
       <span className="text-sm font-medium text-gray-900 dark:text-white">{p.name}</span>
       <div className="flex items-center gap-3 text-xs text-gray-500">
-        {showExpiry && p.expiryDate && <span>{new Date(p.expiryDate).toLocaleDateString("de-DE")}</span>}
+        {showExpiry && p.expiryDate && <span>{new Date(p.expiryDate).toLocaleDateString(lang)}</span>}
         <span>{p.quantity} {UNIT_LABELS[p.unit] ?? p.unit}</span>
       </div>
     </Link>

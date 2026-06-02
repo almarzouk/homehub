@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translations } from "@/lib/i18n";
 
@@ -16,7 +17,7 @@ export function useTranslation() {
   const { lang } = useLanguage();
   const dict = translations[lang];
 
-  const t = (key: string): string => resolve(dict, key.split("."));
+  const t = useCallback((key: string): string => resolve(dict, key.split(".")), [dict]);
 
   return { t, lang };
 }

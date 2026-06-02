@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, Fragment } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Plus, CheckCircle2, Circle, Trash2, Home, RefreshCw, Calendar, AlertTriangle,
 } from "lucide-react";
@@ -18,13 +19,7 @@ interface Aufgabe {
   erledigtAm?: string;
 }
 
-const KATEGORIEN = [
-  { id: "alle", label: "Alle" },
-  { id: "reinigung", label: "Reinigung" },
-  { id: "wartung", label: "Wartung" },
-  { id: "einkauf", label: "Einkauf" },
-  { id: "sonstiges", label: "Sonstiges" },
-] as const;
+const KATEGORIEN_KEYS = ["alle", "reinigung", "wartung", "einkauf", "sonstiges"] as const;
 
 const PRIORITAET_COLOR: Record<string, string> = {
   hoch: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400",
@@ -39,12 +34,7 @@ const KAT_COLOR: Record<string, string> = {
   sonstiges: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
 };
 
-const WIEDER_LABEL: Record<string, string> = {
-  taeglich: "täglich",
-  woechentlich: "wöchentlich",
-  monatlich: "monatlich",
-  nein: "",
-};
+const WIEDER_KEYS = ["taeglich", "woechentlich", "monatlich", "nein"] as const;
 
 const emptyForm = {
   titel: "",
@@ -57,6 +47,7 @@ const emptyForm = {
 
 export default function HaushaltPage() {
   const { t } = useTranslation();
+  const { lang } = useLanguage();
   const [aufgaben, setAufgaben] = useState<Aufgabe[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -88,7 +79,7 @@ export default function HaushaltPage() {
   };
 
   const del = async (id: string) => {
-    if (!confirm("Aufgabe löschen?")) return;
+    if (!confirm(t("haushalt.deleteTask"))) return;
     await fetch(`/api/haushalt/${id}`, { method: "DELETE" });
     load();
   };
@@ -118,21 +109,21 @@ export default function HaushaltPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Haushalt</h1>
-          <p className="text-sm text-gray-500">{offen} offen · {erledigt} erledigt</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("haushalt.title")}</h1>
+          <p className="text-sm text-gray-500">{offen} {t("haushalt.open")} · {erledigt} {t("haushalt.done")}</p>
         </div>
         <button
           onClick={() => setShowForm(true)}
           className="flex items-center gap-2 bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
         >
-          <Plus className="h-4 w-4" /> Neue Aufgabe
+          <Plus className="h-4 w-4" /> {t("haushalt.newTask")}
         </button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Gesamt", value: aufgaben.length, color: "text-gray-700 dark:text-gray-200" },
+          { label: t("haushalt.total"), value: aufgaben.length, color: "text-gray-700 dark:text-gray-200" },
           { label: t("haushalt.pending"), value: offen, color: "text-orange-600 dark:text-orange-400" },
           { label: t("haushalt.completed"), value: erledigt, color: "text-emerald-600 dark:text-emerald-400" },
         ].map(({ label, value, color }) => (
@@ -153,9 +144,9 @@ export default function HaushaltPage() {
               : "bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700"
           }`}
         >
-          Nur offen
+          {t("haushalt.onlyOpen")}
         </button>
-        {KATEGORIEN.map(({ id, label }) => (
+        {KATEGORIEN_KEYS.map((id) => (
           <button
             key={id}
             onClick={() => setFilter(id)}
@@ -165,7 +156,7 @@ export default function HaushaltPage() {
                 : "bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700"
             }`}
           >
-            {label}
+            {id === "alle" ? t("haushalt.all") : t(`haushalt.categories.${id}`)}
           </button>
         ))}
       </div>
@@ -178,7 +169,7 @@ export default function HaushaltPage() {
       ) : aufgaben.length === 0 ? (
         <div className="text-center py-20">
           <Home className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500">Keine Aufgaben</p>
+          <p className="text-gray-500">{t("haushalt.noTasks")}</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -205,14 +196,14 @@ export default function HaushaltPage() {
                 )}
                 <div className="flex flex-wrap gap-1.5 mt-1.5">
                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${KAT_COLOR[a.kategorie]}`}>
-                    {a.kategorie}
+                    {t(`haushalt.categories.${a.kategorie}`)}
                   </span>
                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${PRIORITAET_COLOR[a.prioritaet]}`}>
-                    {a.prioritaet}
+                    {t(`haushalt.priority.${a.prioritaet}`)}
                   </span>
                   {a.wiederholung !== "nein" && (
                     <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
-                      <RefreshCw className="h-3 w-3" />{WIEDER_LABEL[a.wiederholung]}
+                      <RefreshCw className="h-3 w-3" />{t(`haushalt.repeat.${a.wiederholung}`)}
                     </span>
                   )}
                   {a.faelligAm && (
@@ -223,7 +214,7 @@ export default function HaushaltPage() {
                     }`}>
                       {isOverdue(a) && <AlertTriangle className="h-3 w-3" />}
                       <Calendar className="h-3 w-3" />
-                      {new Date(a.faelligAm).toLocaleDateString("de-DE")}
+                      {new Date(a.faelligAm).toLocaleDateString(lang)}
                     </span>
                   )}
                 </div>
@@ -240,53 +231,53 @@ export default function HaushaltPage() {
       {showForm && (
         <div className="fixed inset-0 bg-black/50 flex items-end md:items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Neue Aufgabe</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t("haushalt.newTask")}</h2>
             <form onSubmit={save} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">Titel *</label>
+                <label className="block text-xs font-medium text-gray-500 mb-1">{t("haushalt.title")} *</label>
                 <input required value={form.titel} onChange={(e) => setForm({ ...form, titel: e.target.value })}
                   className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
                   placeholder="z.B. Küche putzen" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">Beschreibung</label>
+                <label className="block text-xs font-medium text-gray-500 mb-1">{t("common.description")}</label>
                 <textarea value={form.beschreibung} onChange={(e) => setForm({ ...form, beschreibung: e.target.value })}
                   rows={2} className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-none" />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Kategorie</label>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">{t("common.category")}</label>
                   <select value={form.kategorie} onChange={(e) => setForm({ ...form, kategorie: e.target.value as Aufgabe["kategorie"] })}
                     className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500">
-                    <option value="reinigung">Reinigung</option>
-                    <option value="wartung">Wartung</option>
-                    <option value="einkauf">Einkauf</option>
-                    <option value="sonstiges">Sonstiges</option>
+                    <option value="reinigung">{t("haushalt.categories.reinigung")}</option>
+                    <option value="wartung">{t("haushalt.categories.wartung")}</option>
+                    <option value="einkauf">{t("haushalt.categories.einkauf")}</option>
+                    <option value="sonstiges">{t("haushalt.categories.sonstiges")}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Priorität</label>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">{t("haushalt.priorityLabel") || "Priorität"}</label>
                   <select value={form.prioritaet} onChange={(e) => setForm({ ...form, prioritaet: e.target.value as Aufgabe["prioritaet"] })}
                     className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500">
-                    <option value="hoch">Hoch</option>
-                    <option value="mittel">Mittel</option>
-                    <option value="niedrig">Niedrig</option>
+                    <option value="hoch">{t("haushalt.priority.hoch")}</option>
+                    <option value="mittel">{t("haushalt.priority.mittel")}</option>
+                    <option value="niedrig">{t("haushalt.priority.niedrig")}</option>
                   </select>
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Wiederholung</label>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">{t("haushalt.repeatLabel")}</label>
                   <select value={form.wiederholung} onChange={(e) => setForm({ ...form, wiederholung: e.target.value as Aufgabe["wiederholung"] })}
                     className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500">
-                    <option value="nein">Keine</option>
-                    <option value="taeglich">Täglich</option>
-                    <option value="woechentlich">Wöchentlich</option>
-                    <option value="monatlich">Monatlich</option>
+                    <option value="nein">{t("haushalt.repeat.nein")}</option>
+                    <option value="taeglich">{t("haushalt.repeat.taeglich")}</option>
+                    <option value="woechentlich">{t("haushalt.repeat.woechentlich")}</option>
+                    <option value="monatlich">{t("haushalt.repeat.monatlich")}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Fällig am</label>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">{t("haushalt.dueDate")}</label>
                   <input type="date" value={form.faelligAm} onChange={(e) => setForm({ ...form, faelligAm: e.target.value })}
                     className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500" />
                 </div>
@@ -294,11 +285,11 @@ export default function HaushaltPage() {
               <div className="flex gap-2 pt-2">
                 <button type="button" onClick={() => { setShowForm(false); setForm(emptyForm); }}
                   className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                  Abbrechen
+                  {t("common.cancel")}
                 </button>
                 <button type="submit" disabled={saving}
                   className="flex-1 px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-medium transition-colors disabled:opacity-50">
-                  {saving ? "Speichern…" : "Speichern"}
+                  {saving ? t("haushalt.saving") : t("common.save")}
                 </button>
               </div>
             </form>

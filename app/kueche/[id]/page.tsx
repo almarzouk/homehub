@@ -30,9 +30,14 @@ interface Kochgeraet {
   leistungen: string[];
 }
 
+import { useTranslation } from "@/hooks/useTranslation";
+import { useLanguage } from "@/contexts/LanguageContext";
+
 export default function GerichtDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const { t } = useTranslation();
+  const { lang } = useLanguage();
   const [gericht, setGericht] = useState<Gericht | null>(null);
   const [kochgeraete, setKochgeraete] = useState<Kochgeraet[]>([]);
   const [loading, setLoading] = useState(true);
@@ -120,7 +125,7 @@ export default function GerichtDetailPage() {
       }),
     });
     const data = await res.json();
-    if (!res.ok) { setError(data.error || "Speicherfehler"); setSaving(false); return; }
+    if (!res.ok) { setError(data.error || t("common.error")); setSaving(false); return; }
     setGericht(data);
     setEditing(false);
     setSaving(false);
@@ -147,7 +152,7 @@ export default function GerichtDetailPage() {
   };
 
   const deleteGericht = async () => {
-    if (!confirm("Gericht wirklich löschen?")) return;
+    if (!confirm(t("kueche.deleteConfirm"))) return;
     setDeleting(true);
     await fetch(`/api/kueche/gerichte/${id}`, { method: "DELETE" });
     router.push("/kueche");
@@ -176,19 +181,19 @@ export default function GerichtDetailPage() {
       <div className="max-w-2xl mx-auto space-y-5">
         <div className="flex items-center gap-3">
           <button onClick={() => setEditing(false)} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800"><ArrowLeft className="h-5 w-5" /></button>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Gericht bearbeiten</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("common.edit")} {t("kueche.title")}</h1>
         </div>
         {error && <div className="bg-red-50 dark:bg-red-950 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">{error}</div>}
 
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 space-y-4">
-          <h2 className="font-semibold">Grundangaben</h2>
+          <h2 className="font-semibold">{t("kueche.details")}</h2>
           <div>
-            <label className="block text-sm font-medium mb-1.5">Name *</label>
+            <label className="block text-sm font-medium mb-1.5">{t("common.name")} *</label>
             <input type="text" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
               className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1.5">Kochgerät *</label>
+            <label className="block text-sm font-medium mb-1.5">{t("kueche.device")} *</label>
             <select value={form.kochgeraet} onChange={(e) => onGeraetChange(e.target.value)}
               className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
               {kochgeraete.map((g) => <option key={g._id} value={g.name}>{g.name}</option>)}
@@ -196,17 +201,17 @@ export default function GerichtDetailPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-sm font-medium mb-1.5">Zeit</label>
+              <label className="block text-sm font-medium mb-1.5">{t("kueche.time")}</label>
               <input type="text" value={form.zeit} onChange={(e) => setForm((f) => ({ ...f, zeit: e.target.value }))}
                 className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1.5">Minuten</label>
+              <label className="block text-sm font-medium mb-1.5">{t("kueche.cookTime")}</label>
               <input type="number" min="0" value={form.zeitMinuten} onChange={(e) => setForm((f) => ({ ...f, zeitMinuten: e.target.value }))}
                 className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1.5">Portionen</label>
+              <label className="block text-sm font-medium mb-1.5">{t("kueche.portions")}</label>
               <input type="number" min="1" value={form.portionen} onChange={(e) => setForm((f) => ({ ...f, portionen: e.target.value }))}
                 className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
             </div>
@@ -221,12 +226,12 @@ export default function GerichtDetailPage() {
           </div>
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" checked={form.favorit} onChange={(e) => setForm((f) => ({ ...f, favorit: e.target.checked }))} className="w-4 h-4 accent-orange-500" />
-            <span className="text-sm">Als Favorit</span>
+            <span className="text-sm">{t("kueche.favorites")}</span>
           </label>
         </div>
 
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 space-y-3">
-          <h2 className="font-semibold">Zutaten</h2>
+          <h2 className="font-semibold">{t("kueche.ingredients")}</h2>
           <div className="flex gap-2">
             <input type="text" value={zutatInput} onChange={(e) => setZutatInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addZutat())} placeholder="Zutat…"
               className="flex-1 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
@@ -242,7 +247,7 @@ export default function GerichtDetailPage() {
         </div>
 
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 space-y-3">
-          <h2 className="font-semibold">Tags</h2>
+          <h2 className="font-semibold">{t("kueche.tags")}</h2>
           <div className="flex gap-2">
             <input type="text" value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTag())} placeholder="Tag…"
               className="flex-1 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
@@ -258,18 +263,16 @@ export default function GerichtDetailPage() {
         </div>
 
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5">
-          <label className="block text-sm font-medium mb-1.5">Notizen</label>
+          <label className="block text-sm font-medium mb-1.5">{t("kueche.notes")}</label>
           <textarea rows={3} value={form.notizen} onChange={(e) => setForm((f) => ({ ...f, notizen: e.target.value }))}
             className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-orange-500" />
         </div>
 
         <div className="flex gap-3">
-          <button onClick={() => setEditing(false)} className="flex-1 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-            Abbrechen
-          </button>
+          <button onClick={() => setEditing(false)} className="flex-1 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">{t("common.cancel")}</button>
           <button onClick={saveEdit} disabled={saving} className="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2">
             {saving ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Check className="h-4 w-4" />}
-            {saving ? "Speichere…" : "Speichern"}
+            {saving ? t("haushalt.saving") : t("common.save")}
           </button>
         </div>
       </div>
@@ -297,15 +300,15 @@ export default function GerichtDetailPage() {
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{gericht.name}</h1>
         <p className="text-orange-500 font-medium">{gericht.kochgeraet}{gericht.programm ? ` · ${gericht.programm}` : ""}{gericht.leistung ? ` · ${gericht.leistung}` : ""}</p>
         <div className="flex flex-wrap gap-4 mt-4 text-sm text-gray-500">
-          {gericht.zeitMinuten && <span className="flex items-center gap-1"><Clock className="h-4 w-4" />{gericht.zeitMinuten} Min.</span>}
-          {gericht.portionen && <span className="flex items-center gap-1"><Users className="h-4 w-4" />{gericht.portionen} Portionen</span>}
+          {gericht.zeitMinuten && <span className="flex items-center gap-1"><Clock className="h-4 w-4" />{gericht.zeitMinuten} {t("kueche.cookTime")}</span>}
+          {gericht.portionen && <span className="flex items-center gap-1"><Users className="h-4 w-4" />{gericht.portionen} {t("kueche.portions")}</span>}
           {gericht.schwierigkeit && <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${gericht.schwierigkeit === "einfach" ? "bg-green-100 text-green-700" : gericht.schwierigkeit === "mittel" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{gericht.schwierigkeit}</span>}
         </div>
       </div>
 
       {gericht.zutaten.length > 0 && (
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5">
-          <h2 className="font-semibold text-gray-900 dark:text-white mb-3">Zutaten</h2>
+          <h2 className="font-semibold text-gray-900 dark:text-white mb-3">{t("kueche.ingredients")}</h2>
           <ul className="space-y-1.5">
             {gericht.zutaten.map((z) => (
               <li key={z} className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
@@ -319,7 +322,7 @@ export default function GerichtDetailPage() {
 
       {gericht.notizen && (
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5">
-          <h2 className="font-semibold text-gray-900 dark:text-white mb-2">Notizen</h2>
+          <h2 className="font-semibold text-gray-900 dark:text-white mb-2">{t("kueche.notes")}</h2>
           <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{gericht.notizen}</p>
         </div>
       )}
@@ -335,9 +338,9 @@ export default function GerichtDetailPage() {
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-500">{gericht.gekochtAnzahl}× gekocht</p>
+            <p className="text-sm text-gray-500">{gericht.gekochtAnzahl}× {t("kueche.cooked")}</p>
             {gericht.zuletztGekocht && (
-              <p className="text-xs text-gray-400">Zuletzt: {new Date(gericht.zuletztGekocht).toLocaleDateString("de-DE")}</p>
+              <p className="text-xs text-gray-400">{t("kueche.lastCooked")}: {new Date(gericht.zuletztGekocht).toLocaleDateString(lang)}</p>
             )}
           </div>
           <button
@@ -345,7 +348,7 @@ export default function GerichtDetailPage() {
             className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-sm font-medium transition-colors"
           >
             <ChefHat className="h-4 w-4" />
-            Als gekocht markieren
+            {t("kueche.markAsCooked")}
           </button>
         </div>
       </div>

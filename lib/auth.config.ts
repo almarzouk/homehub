@@ -12,6 +12,7 @@ export const authConfig: NextAuthConfig = {
       const pathname = nextUrl.pathname;
 
       const publicPaths = [
+        "/landing",
         "/anmelden",
         "/registrieren",
         "/einrichten",
@@ -22,6 +23,8 @@ export const authConfig: NextAuthConfig = {
         "/api/vorrat/suche",
         "/api/mobile",
       ];
+      // Root `/` is the public landing page
+      if (pathname === "/") return true;
       if (publicPaths.some((p) => pathname.startsWith(p))) return true;
 
       return isLoggedIn;

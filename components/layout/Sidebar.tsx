@@ -168,7 +168,7 @@ export default function Sidebar() {
     <aside className="hidden md:flex flex-col w-64 h-screen sticky top-0 bg-white dark:bg-gray-950 border-e border-gray-200 dark:border-gray-800 flex-shrink-0 overflow-y-auto">
       {/* Brand */}
       <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-800">
-        <Link href="/" className="flex items-center gap-2.5">
+        <Link href="/dashboard" className="flex items-center gap-2.5">
           <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-sm">
             <Home className="h-5 w-5 text-white" />
           </div>
@@ -179,15 +179,15 @@ export default function Sidebar() {
       {/* Dashboard link */}
       <div className="px-3 pt-3">
         <Link
-          href="/"
+          href="/dashboard"
           className={cn(
             "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
-            pathname === "/"
+            pathname === "/dashboard"
               ? "bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300"
               : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
           )}
         >
-          <LayoutDashboard className={cn("h-5 w-5", pathname === "/" ? "text-indigo-600" : "text-gray-400")} />
+          <LayoutDashboard className={cn("h-5 w-5", pathname === "/dashboard" ? "text-indigo-600" : "text-gray-400")} />
           {t("nav.dashboard")}
         </Link>
       </div>

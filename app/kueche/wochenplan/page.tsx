@@ -30,15 +30,7 @@ interface GerichtKI {
   tags: string[];
 }
 
-const WOCHENTAGE = [
-  "Montag",
-  "Dienstag",
-  "Mittwoch",
-  "Donnerstag",
-  "Freitag",
-  "Samstag",
-  "Sonntag",
-];
+const WOCHENTAGE_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 
 const SCHWIERIGKEITS_FARBE: Record<string, string> = {
   einfach: "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300",
@@ -62,14 +54,14 @@ export default function WochenplanPage() {
       const res = await fetch("/api/kueche/wochenplan");
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Fehler beim Laden.");
+        setError(data.error ?? t("kueche.loadError"));
         setGerichte([]);
       } else {
         setGerichte(data.gerichte ?? []);
         setWeekKey(data.weekKey ?? "");
       }
     } catch {
-      setError("Netzwerkfehler. Bitte nochmals versuchen.");
+      setError(t("kueche.netError"));
     } finally {
       setLoading(false);
     }
@@ -89,14 +81,14 @@ export default function WochenplanPage() {
       const res = await fetch("/api/kueche/wochenplan");
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Fehler bei Neugenerierung.");
+        setError(data.error ?? t("kueche.regenError"));
         setGerichte([]);
       } else {
         setGerichte(data.gerichte ?? []);
         setWeekKey(data.weekKey ?? "");
       }
     } catch {
-      setError("Netzwerkfehler.");
+      setError(t("kueche.netError"));
     } finally {
       setRegenerating(false);
     }
@@ -113,7 +105,7 @@ export default function WochenplanPage() {
           className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 mb-4"
         >
           <ArrowLeft className="h-4 w-4" />
-          Zurück zur Küche
+          {t("kueche.backToKitchen")}
         </Link>
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -122,7 +114,6 @@ export default function WochenplanPage() {
               {t("kueche.aiPlan")}
             </h1>
             <p className="text-sm text-gray-500 mt-1">
-              7 syrisch-libanesische Gerichte — automatisch generiert
               {weekKey && <span className="ml-1 text-orange-500">{weekKey}</span>}
             </p>
           </div>
@@ -132,8 +123,7 @@ export default function WochenplanPage() {
             className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white rounded-xl text-sm font-medium transition-colors"
           >
             <RefreshCw className={`h-4 w-4 ${regenerating ? "animate-spin" : ""}`} />
-            <span className="hidden sm:inline">{t("kueche.regenerate")}</span>
-            <span className="sm:hidden">Neu</span>
+            <span>{t("kueche.regenerate")}</span>
           </button>
         </div>
       </div>
@@ -146,7 +136,7 @@ export default function WochenplanPage() {
             <p className="text-sm font-medium text-red-800 dark:text-red-300">{error}</p>
             {error.includes("OPENAI_API_KEY") && (
               <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-                Bitte fügen Sie den OPENAI_API_KEY zur .env.local hinzu und starten Sie den Server neu.
+                {t("kueche.openAIKeyHint")}
               </p>
             )}
           </div>
@@ -167,7 +157,7 @@ export default function WochenplanPage() {
           ))}
           {regenerating && (
             <p className="text-center text-sm text-gray-500">
-              KI generiert Ihren Wochenplan… Das kann bis zu 30 Sekunden dauern.
+              {t("kueche.generatingPlan")}
             </p>
           )}
         </div>
@@ -177,13 +167,13 @@ export default function WochenplanPage() {
       {!loading && !regenerating && gerichte.length === 0 && !error && (
         <div className="text-center py-20">
           <ChefHat className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500 mb-4">Noch kein Wochenplan generiert.</p>
+          <p className="text-gray-500 mb-4">{t("kueche.noWeekPlan")}</p>
           <button
             onClick={regenerate}
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-medium transition-colors"
           >
             <Sparkles className="h-4 w-4" />
-            Wochenplan generieren
+            {t("kueche.generatePlan")}
           </button>
         </div>
       )}
@@ -206,14 +196,14 @@ export default function WochenplanPage() {
                   {/* Day badge */}
                   <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-950 flex items-center justify-center">
                     <span className="text-xs font-bold text-orange-600 dark:text-orange-400 leading-tight text-center">
-                      {WOCHENTAGE[i]?.slice(0, 2)}
+                      {t(`kueche.week.${WOCHENTAGE_KEYS[i]}`)}
                     </span>
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-0.5">
                       <span className="text-xs font-medium text-orange-500">
-                        {WOCHENTAGE[i]}
+                        {t(`kueche.week.${WOCHENTAGE_KEYS[i]}`)}
                       </span>
                       {g.schwierigkeit && (
                         <span
@@ -257,7 +247,7 @@ export default function WochenplanPage() {
                     {g.zutaten.length > 0 && (
                       <div>
                         <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                          Zutaten
+                          {t("kueche.ingredients")}
                         </h3>
                         <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1">
                           {g.zutaten.map((z, idx) => (
@@ -277,7 +267,7 @@ export default function WochenplanPage() {
                     {g.notizen && (
                       <div>
                         <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                          Zubereitung
+                          {t("kueche.preparation")}
                         </h3>
                         <div className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-line">
                           {g.notizen}
@@ -290,7 +280,7 @@ export default function WochenplanPage() {
                       href={`/kueche/${g._id}`}
                       className="inline-flex items-center gap-2 text-sm text-orange-500 hover:text-orange-600 font-medium"
                     >
-                      Zum vollständigen Rezept
+                      {t("kueche.fullRecipe")}
                     </Link>
                   </div>
                 )}

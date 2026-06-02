@@ -60,6 +60,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           // Block blocked users from logging in
           if (user.isBlocked) return null;
 
+          // Block unapproved users (isApproved === false; undefined = legacy approved)
+          if (user.isApproved === false) return null;
+
           return {
             id: String(user._id),
             name: user.name,
