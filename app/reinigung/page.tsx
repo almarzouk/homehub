@@ -113,7 +113,7 @@ export default function ReinigungPage() {
       {showForm && (
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 space-y-4">
           <h2 className="font-semibold text-gray-900 dark:text-white">Neue Aufgabe</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <input className="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="Bereich *" value={form.bereich} onChange={(e) => setForm({ ...form, bereich: e.target.value })} list="bereiche-list" />
             <datalist id="bereiche-list">{bereiche.map((b) => <option key={b} value={b} />)}</datalist>
             <input className="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="Aufgabe *" value={form.aufgabe} onChange={(e) => setForm({ ...form, aufgabe: e.target.value })} />

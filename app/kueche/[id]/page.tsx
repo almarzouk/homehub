@@ -194,7 +194,7 @@ export default function GerichtDetailPage() {
               {kochgeraete.map((g) => <option key={g._id} value={g.name}>{g.name}</option>)}
             </select>
           </div>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-sm font-medium mb-1.5">Zeit</label>
               <input type="text" value={form.zeit} onChange={(e) => setForm((f) => ({ ...f, zeit: e.target.value }))}

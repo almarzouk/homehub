@@ -1,12 +1,21 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Cairo } from "next/font/google";
 import "./globals.css";
 import ClientLayout from "@/components/layout/ClientLayout";
 import ThemeProvider from "@/components/layout/ThemeProvider";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+  display: "swap",
+});
+
+const cairo = Cairo({
+  subsets: ["arabic", "latin"],
+  variable: "--font-cairo",
+  weight: ["300", "400", "500", "600", "700", "800"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -31,10 +40,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="de" className={`${inter.variable} h-full`} suppressHydrationWarning>
+    <html lang="de" dir="ltr" className={`${inter.variable} ${cairo.variable} h-full`} suppressHydrationWarning>
       <body className="min-h-full bg-gray-50 dark:bg-gray-900 font-sans antialiased">
         <ThemeProvider>
-          <ClientLayout>{children}</ClientLayout>
+          <LanguageProvider>
+            <ClientLayout>{children}</ClientLayout>
+          </LanguageProvider>
         </ThemeProvider>
         <script
           dangerouslySetInnerHTML={{

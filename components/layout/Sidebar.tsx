@@ -40,16 +40,18 @@ import {
 import { cn } from "@/lib/utils";
 import UserMenu from "./UserMenu";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import LanguageToggle from "@/components/ui/LanguageToggle";
 import { useAlertCount } from "@/hooks/useAlertCount";
+import { useTranslation } from "@/hooks/useTranslation";
 
 type NavSection = {
   id: string;
-  label: string;
+  labelKey: string;
   icon: React.ElementType;
   color: string;
   items: {
     href: string;
-    label: string;
+    labelKey: string;
     icon: React.ElementType;
     badge?: boolean;
   }[];
@@ -58,81 +60,81 @@ type NavSection = {
 const sections: NavSection[] = [
   {
     id: "kueche",
-    label: "Küche",
+    labelKey: "nav.sections.kueche",
     icon: ChefHat,
     color: "text-orange-500",
     items: [
-      { href: "/kueche", label: "Gerichte", icon: UtensilsCrossed },
-      { href: "/kueche/statistiken", label: "Statistiken", icon: BarChart3 },
-      { href: "/kueche/einstellungen", label: "Kochgeräte", icon: Settings },
+      { href: "/kueche", labelKey: "nav.items.gerichte", icon: UtensilsCrossed },
+      { href: "/kueche/statistiken", labelKey: "nav.items.statistiken", icon: BarChart3 },
+      { href: "/kueche/einstellungen", labelKey: "nav.items.kochgeraete", icon: Settings },
     ],
   },
   {
     id: "vorrat",
-    label: "Vorrat",
+    labelKey: "nav.sections.vorrat",
     icon: Package,
     color: "text-blue-500",
     items: [
-      { href: "/vorrat", label: "Inventar", icon: Package },
-      { href: "/scan", label: "Scannen", icon: ScanLine },
-      { href: "/warnungen", label: "Warnungen", icon: Bell, badge: true },
-      { href: "/bewegungen", label: "Bewegungen", icon: ArrowLeftRight },
-      { href: "/einkaufsliste", label: "Einkaufsliste", icon: ShoppingCart },
+      { href: "/vorrat", labelKey: "nav.items.inventar", icon: Package },
+      { href: "/scan", labelKey: "nav.items.scannen", icon: ScanLine },
+      { href: "/warnungen", labelKey: "nav.items.warnungen", icon: Bell, badge: true },
+      { href: "/bewegungen", labelKey: "nav.items.bewegungen", icon: ArrowLeftRight },
+      { href: "/einkaufsliste", labelKey: "nav.items.einkaufsliste", icon: ShoppingCart },
     ],
   },
   {
     id: "haushalt",
-    label: "Haushalt",
+    labelKey: "nav.sections.haushalt",
     icon: ClipboardList,
     color: "text-cyan-500",
     items: [
-      { href: "/haushalt", label: "Aufgaben", icon: ClipboardList },
-      { href: "/medikamente", label: "Medikamente", icon: Pill },
-      { href: "/wunschliste", label: "Wunschliste", icon: Gift },
-      { href: "/dokumente", label: "Dokumente", icon: FileText },
-      { href: "/kalender", label: "Kalender", icon: Calendar },
-      { href: "/reinigung", label: "Reinigungsplan", icon: Sparkles },
-      { href: "/lieferungen", label: "Lieferungen", icon: Truck },
+      { href: "/haushalt", labelKey: "nav.items.aufgaben", icon: ClipboardList },
+      { href: "/medikamente", labelKey: "nav.items.medikamente", icon: Pill },
+      { href: "/wunschliste", labelKey: "nav.items.wunschliste", icon: Gift },
+      { href: "/dokumente", labelKey: "nav.items.dokumente", icon: FileText },
+      { href: "/kalender", labelKey: "nav.items.kalender", icon: Calendar },
+      { href: "/reinigung", labelKey: "nav.items.reinigung", icon: Sparkles },
+      { href: "/lieferungen", labelKey: "nav.items.lieferungen", icon: Truck },
     ],
   },
   {
     id: "finanzen",
-    label: "Finanzen",
+    labelKey: "nav.sections.finanzen",
     icon: Wallet,
     color: "text-emerald-500",
     items: [
-      { href: "/finanzen/dashboard", label: "Übersicht", icon: LayoutDashboard },
-      { href: "/finanzen/ausgaben", label: "Ausgaben", icon: Receipt },
-      { href: "/finanzen/investitionen", label: "Investitionen", icon: TrendingUp },
-      { href: "/finanzen/sparziele", label: "Sparziele", icon: PiggyBank },
-      { href: "/finanzen/monatsplan", label: "Monatsplan", icon: CalendarClock },
-      { href: "/finanzen/gehalt", label: "Gehalt", icon: Wallet },
-      { href: "/finanzen/berichte", label: "Berichte", icon: FileBarChart },
-      { href: "/energie", label: "Energieverbrauch", icon: Zap },
+      { href: "/finanzen/dashboard", labelKey: "nav.items.uebersicht", icon: LayoutDashboard },
+      { href: "/finanzen/ausgaben", labelKey: "nav.items.ausgaben", icon: Receipt },
+      { href: "/finanzen/investitionen", labelKey: "nav.items.investitionen", icon: TrendingUp },
+      { href: "/finanzen/sparziele", labelKey: "nav.items.sparziele", icon: PiggyBank },
+      { href: "/finanzen/monatsplan", labelKey: "nav.items.monatsplan", icon: CalendarClock },
+      { href: "/finanzen/gehalt", labelKey: "nav.items.gehalt", icon: Wallet },
+      { href: "/finanzen/berichte", labelKey: "nav.items.berichte", icon: FileBarChart },
+      { href: "/energie", labelKey: "nav.items.energie", icon: Zap },
     ],
   },
   {
     id: "familie",
-    label: "Familie",
+    labelKey: "nav.sections.familie",
     icon: Users,
     color: "text-pink-500",
     items: [
-      { href: "/familie", label: "Mitglieder", icon: Users },
-      { href: "/benachrichtigungen", label: "Benachrichtigungen", icon: Bell, badge: true },
-      { href: "/familie/termine", label: "Termine", icon: Calendar },
-      { href: "/chat", label: "Haushalts-Chat", icon: MessageCircle },
-      { href: "/fitness", label: "Fitness", icon: Activity },
-      { href: "/einstellungen", label: "Einstellungen", icon: Settings },
+      { href: "/familie", labelKey: "nav.items.mitglieder", icon: Users },
+      { href: "/benachrichtigungen", labelKey: "nav.items.benachrichtigungen", icon: Bell, badge: true },
+      { href: "/familie/termine", labelKey: "nav.items.termine", icon: Calendar },
+      { href: "/chat", labelKey: "nav.items.chat", icon: MessageCircle },
+      { href: "/fitness", labelKey: "nav.items.fitness", icon: Activity },
+      { href: "/einstellungen", labelKey: "nav.items.einstellungen", icon: Settings },
     ],
   },
   {
     id: "fahrzeuge-tiere",
-    label: "Fahrzeuge & Haustiere",
+    labelKey: "nav.sections.fahrzeuge",
     icon: Car,
     color: "text-amber-500",
     items: [
-      { href: "/fahrzeuge", label: "Fahrzeugpflege", icon: Car },
-      { href: "/haustiere", label: "Haustiere", icon: PawPrint },
+      { href: "/fahrzeuge", labelKey: "nav.items.fahrzeugpflege", icon: Car },
+      { href: "/haustiere", labelKey: "nav.items.haustiere", icon: PawPrint },
     ],
   },
 ];
@@ -140,6 +142,7 @@ const sections: NavSection[] = [
 export default function Sidebar() {
   const pathname = usePathname();
   const alertCount = useAlertCount();
+  const { t } = useTranslation();
 
   // Determine which section contains the current route
   const activeSection = sections.find((s) =>
@@ -158,7 +161,7 @@ export default function Sidebar() {
       : pathname.startsWith(href);
 
   return (
-    <aside className="hidden md:flex flex-col w-64 h-screen sticky top-0 bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 flex-shrink-0 overflow-y-auto">
+    <aside className="hidden md:flex flex-col w-64 h-screen sticky top-0 bg-white dark:bg-gray-950 border-e border-gray-200 dark:border-gray-800 flex-shrink-0 overflow-y-auto">
       {/* Brand */}
       <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-800">
         <Link href="/" className="flex items-center gap-2.5">
@@ -181,7 +184,7 @@ export default function Sidebar() {
           )}
         >
           <LayoutDashboard className={cn("h-5 w-5", pathname === "/" ? "text-indigo-600" : "text-gray-400")} />
-          Dashboard
+          {t("nav.dashboard")}
         </Link>
       </div>
 
@@ -194,11 +197,11 @@ export default function Sidebar() {
             <div key={section.id}>
               <button
                 onClick={() => toggleSection(section.id)}
-                className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-150"
+                className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs font-semibold text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-150"
               >
                 <div className="flex items-center gap-2">
                   <SectionIcon className={cn("h-4 w-4", section.color)} />
-                  {section.label}
+                  {t(section.labelKey)}
                 </div>
                 {openSection === section.id ? (
                   <ChevronDown className="h-3.5 w-3.5" />
@@ -208,8 +211,8 @@ export default function Sidebar() {
               </button>
 
               {openSection === section.id && (
-                <ul className="mt-0.5 space-y-0.5 pl-2">
-                  {section.items.map(({ href, label, icon: Icon, badge }) => {
+                <ul className="mt-0.5 space-y-0.5 ps-2">
+                  {section.items.map(({ href, labelKey, icon: Icon, badge }) => {
                     const active = isActive(href);
                     const showBadge = badge && alertCount > 0;
 
@@ -227,12 +230,12 @@ export default function Sidebar() {
                           <div className="relative flex-shrink-0">
                             <Icon className={cn("h-4 w-4", active ? "text-blue-600 dark:text-blue-400" : "text-gray-400")} />
                             {showBadge && (
-                              <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[14px] h-3.5 px-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full leading-none">
+                              <span className="absolute -top-1.5 -end-1.5 flex items-center justify-center min-w-[14px] h-3.5 px-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full leading-none">
                                 {alertCount > 99 ? "99+" : alertCount}
                               </span>
                             )}
                           </div>
-                          {label}
+                          {t(labelKey)}
                         </Link>
                       </li>
                     );
@@ -244,10 +247,14 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Theme + User */}
+      {/* Language + Theme + User */}
       <div className="px-3 py-3 border-t border-gray-100 dark:border-gray-800 space-y-2">
         <div className="flex items-center justify-between px-3">
-          <span className="text-xs text-gray-400">Design</span>
+          <span className="text-xs text-gray-400">{t("nav.language")}</span>
+          <LanguageToggle />
+        </div>
+        <div className="flex items-center justify-between px-3">
+          <span className="text-xs text-gray-400">{t("nav.design")}</span>
           <ThemeToggle />
         </div>
         <UserMenu />

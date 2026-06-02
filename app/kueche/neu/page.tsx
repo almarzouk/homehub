@@ -145,7 +145,7 @@ export default function NeuesGerichtPage() {
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-2 gap-3">
             {programme.length > 0 && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Programm</label>
@@ -178,7 +178,7 @@ export default function NeuesGerichtPage() {
         {/* Details */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 space-y-4">
           <h2 className="font-semibold text-gray-900 dark:text-white">Details</h2>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Zeit (Text)</label>
               <input
@@ -213,7 +213,7 @@ export default function NeuesGerichtPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Schwierigkeit</label>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               {["einfach", "mittel", "schwer"].map((s) => (
                 <button
                   key={s}

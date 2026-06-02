@@ -251,7 +251,7 @@ export default function HaushaltPage() {
                 <textarea value={form.beschreibung} onChange={(e) => setForm({ ...form, beschreibung: e.target.value })}
                   rows={2} className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-none" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-gray-500 mb-1">Kategorie</label>
                   <select value={form.kategorie} onChange={(e) => setForm({ ...form, kategorie: e.target.value as Aufgabe["kategorie"] })}
@@ -272,7 +272,7 @@ export default function HaushaltPage() {
                   </select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-gray-500 mb-1">Wiederholung</label>
                   <select value={form.wiederholung} onChange={(e) => setForm({ ...form, wiederholung: e.target.value as Aufgabe["wiederholung"] })}

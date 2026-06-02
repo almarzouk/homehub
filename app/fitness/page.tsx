@@ -103,7 +103,7 @@ export default function FitnessPage() {
       {showForm && (
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 space-y-4">
           <h2 className="font-semibold text-gray-900 dark:text-white">Neuer Eintrag</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <select className="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" value={form.typ} onChange={(e) => setForm({ ...form, typ: e.target.value, einheit: TYP_CONFIG[e.target.value]?.einheit ?? "" })}>
               {Object.entries(TYP_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
             </select>

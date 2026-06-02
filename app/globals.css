@@ -24,8 +24,42 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Inter, system-ui, -apple-system, sans-serif;
+  font-family: var(--font-inter), Inter, system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+/* ── Arabic language: use Cairo font, enable RTL ─────────────────────────── */
+:root[lang="ar"] body,
+:root[lang="ar"] * {
+  font-family: var(--font-cairo), 'Cairo', 'Segoe UI', system-ui, sans-serif !important;
+  letter-spacing: 0 !important;
+}
+
+:root[lang="ar"] {
+  --font-family: var(--font-cairo), 'Cairo', sans-serif;
+}
+
+/* Arabic: improve text rendering */
+:root[lang="ar"] p,
+:root[lang="ar"] span,
+:root[lang="ar"] label,
+:root[lang="ar"] button,
+:root[lang="ar"] a,
+:root[lang="ar"] input,
+:root[lang="ar"] textarea {
+  line-height: 1.8;
+}
+
+/* RTL: uppercase tracking looks wrong in Arabic — reset it */
+:root[lang="ar"] .uppercase {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* RTL: Sidebar drawer (mobile) comes from left */
+:root[dir="rtl"] .drawer-slide {
+  right: auto !important;
+  left: 0 !important;
 }
 
 /* Scrollbar */

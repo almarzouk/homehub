@@ -129,7 +129,7 @@ export default function FahrzeugePage() {
       {showForm && (
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 space-y-4">
           <h2 className="font-semibold text-gray-900 dark:text-white">Neues Fahrzeug</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <input className="col-span-2 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Bezeichnung *" value={form.bezeichnung} onChange={(e) => setForm({ ...form, bezeichnung: e.target.value })} />
             <input className="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Kennzeichen" value={form.kennzeichen} onChange={(e) => setForm({ ...form, kennzeichen: e.target.value })} />
             <input className="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Marke" value={form.marke} onChange={(e) => setForm({ ...form, marke: e.target.value })} />

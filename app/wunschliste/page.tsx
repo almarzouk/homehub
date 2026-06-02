@@ -201,7 +201,7 @@ export default function WunschlistePage() {
                   className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                   placeholder="z.B. Neues Laptop" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-gray-500 mb-1">Preis (€) *</label>
                   <input required type="number" step="0.01" min="0" value={form.preis}
