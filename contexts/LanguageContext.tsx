@@ -22,7 +22,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   // Restore from localStorage after mount
   useEffect(() => {
     const stored = localStorage.getItem("homehub-lang") as Lang | null;
-    if (stored === "ar" || stored === "de") {
+    if (stored && (stored === "ar" || stored === "de" || stored === "es" || stored === "bg")) {
       setLangState(stored);
     }
     setMounted(true);
