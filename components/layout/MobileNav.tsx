@@ -12,13 +12,14 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAlertCount } from "@/hooks/useAlertCount";
+import { useNotificationCount } from "@/hooks/useNotificationCount";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import LanguageToggle from "@/components/ui/LanguageToggle";
 import UserMenu from "./UserMenu";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-type NavItem = { href: string; labelKey: string; icon: React.ElementType; badge?: boolean };
+type NavItem = { href: string; labelKey: string; icon: React.ElementType; badge?: "alerts" | "notifications" };
 type NavSection = { id: string; labelKey: string; icon: React.ElementType; color: string; items: NavItem[] };
 
 const sections: NavSection[] = [
@@ -35,7 +36,7 @@ const sections: NavSection[] = [
     items: [
       { href: "/vorrat", labelKey: "nav.items.inventar", icon: Package },
       { href: "/scan", labelKey: "nav.items.scannen", icon: ScanLine },
-      { href: "/warnungen", labelKey: "nav.items.warnungen", icon: Bell, badge: true },
+      { href: "/warnungen", labelKey: "nav.items.warnungen", icon: Bell, badge: "alerts" },
       { href: "/bewegungen", labelKey: "nav.items.bewegungen", icon: ArrowLeftRight },
       { href: "/einkaufsliste", labelKey: "nav.items.einkaufsliste", icon: ShoppingCart },
     ],
@@ -69,7 +70,7 @@ const sections: NavSection[] = [
     id: "familie", labelKey: "nav.sections.familie", icon: Users, color: "text-pink-500",
     items: [
       { href: "/familie", labelKey: "nav.items.mitglieder", icon: Users },
-      { href: "/benachrichtigungen", labelKey: "nav.items.benachrichtigungen", icon: Bell },
+      { href: "/benachrichtigungen", labelKey: "nav.items.benachrichtigungen", icon: Bell, badge: "notifications" },
       { href: "/familie/termine", labelKey: "nav.items.termine", icon: Calendar },
       { href: "/chat", labelKey: "nav.items.chat", icon: MessageCircle },
       { href: "/fitness", labelKey: "nav.items.fitness", icon: Activity },
@@ -88,6 +89,7 @@ const sections: NavSection[] = [
 export default function MobileNav() {
   const pathname = usePathname();
   const alertCount = useAlertCount();
+  const notificationCount = useNotificationCount();
   const { t } = useTranslation();
   const { isRTL } = useLanguage();
   const [open, setOpen] = useState(false);
@@ -119,7 +121,7 @@ export default function MobileNav() {
             className="relative p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
           >
             <Bell className="h-5 w-5" />
-            {alertCount > 0 && (
+            {notificationCount > 0 && (
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
             )}
           </Link>
@@ -202,7 +204,8 @@ export default function MobileNav() {
                   <ul className="mt-0.5 space-y-0.5 ps-2">
                     {section.items.map(({ href, labelKey, icon: Icon, badge }) => {
                       const active = isActive(href);
-                      const showBadge = badge && alertCount > 0;
+                      const badgeNum = badge === "alerts" ? alertCount : badge === "notifications" ? notificationCount : 0;
+                      const showBadge = badgeNum > 0;
                       return (
                         <li key={href}>
                           <Link
@@ -218,7 +221,7 @@ export default function MobileNav() {
                               <Icon className={cn("h-4 w-4", active ? "text-blue-600 dark:text-blue-400" : "text-gray-400")} />
                               {showBadge && (
                                 <span className="absolute -top-1.5 -end-1.5 flex items-center justify-center min-w-[14px] h-3.5 px-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full">
-                                  {alertCount > 99 ? "99+" : alertCount}
+                                  {badgeNum > 99 ? "99+" : badgeNum}
                                 </span>
                               )}
                             </div>

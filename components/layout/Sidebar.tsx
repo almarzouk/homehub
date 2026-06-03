@@ -42,6 +42,7 @@ import UserMenu from "./UserMenu";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import LanguageToggle from "@/components/ui/LanguageToggle";
 import { useAlertCount } from "@/hooks/useAlertCount";
+import { useNotificationCount } from "@/hooks/useNotificationCount";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useSession } from "next-auth/react";
 import { ShieldCheck } from "lucide-react";
@@ -55,7 +56,7 @@ type NavSection = {
     href: string;
     labelKey: string;
     icon: React.ElementType;
-    badge?: boolean;
+    badge?: "alerts" | "notifications";
   }[];
 };
 
@@ -79,7 +80,7 @@ const sections: NavSection[] = [
     items: [
       { href: "/vorrat", labelKey: "nav.items.inventar", icon: Package },
       { href: "/scan", labelKey: "nav.items.scannen", icon: ScanLine },
-      { href: "/warnungen", labelKey: "nav.items.warnungen", icon: Bell, badge: true },
+      { href: "/warnungen", labelKey: "nav.items.warnungen", icon: Bell, badge: "alerts" },
       { href: "/bewegungen", labelKey: "nav.items.bewegungen", icon: ArrowLeftRight },
       { href: "/einkaufsliste", labelKey: "nav.items.einkaufsliste", icon: ShoppingCart },
     ],
@@ -122,7 +123,7 @@ const sections: NavSection[] = [
     color: "text-pink-500",
     items: [
       { href: "/familie", labelKey: "nav.items.mitglieder", icon: Users },
-      { href: "/benachrichtigungen", labelKey: "nav.items.benachrichtigungen", icon: Bell, badge: true },
+      { href: "/benachrichtigungen", labelKey: "nav.items.benachrichtigungen", icon: Bell, badge: "notifications" },
       { href: "/familie/termine", labelKey: "nav.items.termine", icon: Calendar },
       { href: "/chat", labelKey: "nav.items.chat", icon: MessageCircle },
       { href: "/fitness", labelKey: "nav.items.fitness", icon: Activity },
@@ -144,6 +145,7 @@ const sections: NavSection[] = [
 export default function Sidebar() {
   const pathname = usePathname();
   const alertCount = useAlertCount();
+  const notificationCount = useNotificationCount();
   const { t } = useTranslation();
   const { data: session } = useSession();
   const isAdmin = (session?.user as { role?: string })?.role === "admin";
@@ -218,7 +220,8 @@ export default function Sidebar() {
                 <ul className="mt-0.5 space-y-0.5 ps-2">
                   {section.items.map(({ href, labelKey, icon: Icon, badge }) => {
                     const active = isActive(href);
-                    const showBadge = badge && alertCount > 0;
+                    const badgeNum = badge === "alerts" ? alertCount : badge === "notifications" ? notificationCount : 0;
+                    const showBadge = badgeNum > 0;
 
                     return (
                       <li key={href}>
@@ -235,7 +238,7 @@ export default function Sidebar() {
                             <Icon className={cn("h-4 w-4", active ? "text-blue-600 dark:text-blue-400" : "text-gray-400")} />
                             {showBadge && (
                               <span className="absolute -top-1.5 -end-1.5 flex items-center justify-center min-w-[14px] h-3.5 px-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full leading-none">
-                                {alertCount > 99 ? "99+" : alertCount}
+                                {badgeNum > 99 ? "99+" : badgeNum}
                               </span>
                             )}
                           </div>

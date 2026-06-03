@@ -10,7 +10,6 @@ interface Notification {
   title: string;
   body: string;
   senderName: string;
-  icon?: string;
   url?: string;
   createdAt: string;
 }
@@ -116,8 +115,8 @@ export default function BenachrichtigungenPage() {
               className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 hover:border-gray-200 dark:hover:border-gray-700 transition-colors"
             >
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950 flex items-center justify-center flex-shrink-0 text-lg">
-                  {n.icon ?? "🔔"}
+                <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950 flex items-center justify-center flex-shrink-0">
+                  <Bell className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
