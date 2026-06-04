@@ -181,7 +181,7 @@ export default function MitgliederPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className=" mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
         <Link href="/einstellungen" className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">

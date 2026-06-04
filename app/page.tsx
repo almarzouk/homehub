@@ -173,7 +173,7 @@ export default function RootPage() {
         </div>
 
         {/* App mockup */}
-        <div className="relative max-w-5xl mx-auto mt-20">
+        <div className="relative mx-auto mt-20">
           <div className="bg-gradient-to-b from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 rounded-3xl p-4 shadow-2xl border border-gray-200 dark:border-gray-700">
             <div className="bg-white dark:bg-gray-950 rounded-2xl overflow-hidden">
               <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
