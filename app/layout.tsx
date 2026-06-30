@@ -41,7 +41,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="de" dir="ltr" className={`${inter.variable} ${cairo.variable} h-full`} suppressHydrationWarning>
-      <body className="min-h-full bg-gray-50 dark:bg-gray-900 font-sans antialiased">
+      <body className="min-h-full font-sans antialiased" style={{ background: "var(--background)", color: "var(--foreground)" }}>
         <ThemeProvider>
           <LanguageProvider>
             <ClientLayout>{children}</ClientLayout>

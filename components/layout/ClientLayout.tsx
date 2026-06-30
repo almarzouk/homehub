@@ -5,6 +5,7 @@ import Sidebar from "./Sidebar";
 import MobileNav from "./MobileNav";
 import SessionProvider from "./SessionProvider";
 import PublicNav from "./PublicNav";
+import { ToastContainer } from "@/components/ui/Toast";
 
 // These paths get full public header+footer (no auth required)
 const PUBLIC_NAV_PATHS = ["/anmelden", "/registrieren", "/einrichten"];
@@ -21,29 +22,25 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const isPublicNav = PUBLIC_NAV_PATHS.some((p) => pathname.startsWith(p));
   const isStandalone = STANDALONE_PATHS.some((p) => pathname.startsWith(p));
 
-  if (isBarePublic) {
-    return <SessionProvider>{children}</SessionProvider>;
-  }
-
-  if (isPublicNav) {
-    return <SessionProvider><PublicNav>{children}</PublicNav></SessionProvider>;
-  }
-
-  if (isStandalone) {
-    return <SessionProvider>{children}</SessionProvider>;
-  }
-
   return (
-    <SessionProvider>
-      <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-900">
-        <Sidebar />
-        <main className="flex-1 overflow-y-auto min-w-0 pt-14 md:pt-0">
-          <div className="p-4 md:p-8 pb-24 md:pb-8 max-w-7xl w-full mx-auto">
-            {children}
+    <>
+      <ToastContainer />
+      <SessionProvider>
+        {isBarePublic && children}
+        {isPublicNav && <PublicNav>{children}</PublicNav>}
+        {isStandalone && children}
+        {!isBarePublic && !isPublicNav && !isStandalone && (
+          <div className="flex h-screen overflow-hidden" style={{ background: "var(--background)" }}>
+            <Sidebar />
+            <main className="flex-1 overflow-y-auto min-w-0 pt-14 md:pt-0">
+              <div className="p-4 md:p-6 lg:p-8 pb-24 md:pb-8 max-w-7xl w-full mx-auto">
+                <div className="page-transition">{children}</div>
+              </div>
+            </main>
           </div>
-        </main>
-      </div>
-      <MobileNav />
-    </SessionProvider>
+        )}
+        {!isBarePublic && !isPublicNav && !isStandalone && <MobileNav />}
+      </SessionProvider>
+    </>
   );
 }

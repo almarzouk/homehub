@@ -18,6 +18,9 @@ import {
   Package,
   Settings,
   CalendarDays,
+  Plane,
+  Baby,
+  Banknote,
   LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -32,7 +35,7 @@ interface MehrItem {
 }
 
 const MEHR_ITEMS: MehrItem[] = [
-  { href: "/haushalt", icon: Home, labelKey: "haushalt", descKey: "haushalt", color: "text-cyan-500 bg-cyan-50 dark:bg-cyan-950" },
+  { href: "/haushalt", icon: Home, labelKey: "aufgaben", descKey: "haushalt", color: "text-cyan-500 bg-cyan-50 dark:bg-cyan-950" },
   { href: "/medikamente", icon: Pill, labelKey: "medikamente", descKey: "medikamente", color: "text-red-500 bg-red-50 dark:bg-red-950" },
   { href: "/wunschliste", icon: Gift, labelKey: "wunschliste", descKey: "wunschliste", color: "text-pink-500 bg-pink-50 dark:bg-pink-950" },
   { href: "/dokumente", icon: FileText, labelKey: "dokumente", descKey: "dokumente", color: "text-blue-500 bg-blue-50 dark:bg-blue-950" },
@@ -48,6 +51,10 @@ const MEHR_ITEMS: MehrItem[] = [
   { href: "/fitness", icon: Dumbbell, labelKey: "fitness", descKey: "fitness", color: "text-teal-500 bg-teal-50 dark:bg-teal-950" },
   { href: "/lieferungen", icon: Package, labelKey: "lieferungen", descKey: "lieferungen", color: "text-rose-500 bg-rose-50 dark:bg-rose-950" },
   { href: "/einstellungen", icon: Settings, labelKey: "einstellungen", descKey: "einstellungen", color: "text-gray-500 bg-gray-100 dark:bg-gray-800" },
+  { href: "/reisecheckliste", icon: Plane, labelKey: "reisecheckliste", descKey: "reisecheckliste", color: "text-sky-500 bg-sky-50 dark:bg-sky-950" },
+  { href: "/baby", icon: Baby, labelKey: "baby", descKey: "baby", color: "text-pink-500 bg-pink-50 dark:bg-pink-950" },
+  { href: "/reisen", icon: Plane, labelKey: "reisen", descKey: "reisen", color: "text-blue-500 bg-blue-50 dark:bg-blue-950" },
+  { href: "/haushaltskasse", icon: Banknote, labelKey: "haushaltskasse", descKey: "haushaltskasse", color: "text-emerald-500 bg-emerald-50 dark:bg-emerald-950" },
 ];
 
 export default function MehrPage() {

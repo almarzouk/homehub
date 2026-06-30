@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   ChefHat,
@@ -31,11 +31,15 @@ import {
   Calendar,
   Car,
   PawPrint,
-  Zap,
   MessageCircle,
   Activity,
   Truck,
   Sparkles,
+  ShieldCheck,
+  Plane,
+  Baby,
+  Banknote,
+  Lock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import UserMenu from "./UserMenu";
@@ -45,7 +49,6 @@ import { useAlertCount } from "@/hooks/useAlertCount";
 import { useNotificationCount } from "@/hooks/useNotificationCount";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useSession } from "next-auth/react";
-import { ShieldCheck } from "lucide-react";
 
 type NavSection = {
   id: string;
@@ -97,7 +100,10 @@ const sections: NavSection[] = [
       { href: "/dokumente", labelKey: "nav.items.dokumente", icon: FileText },
       { href: "/kalender", labelKey: "nav.items.kalender", icon: Calendar },
       { href: "/reinigung", labelKey: "nav.items.reinigung", icon: Sparkles },
-      { href: "/lieferungen", labelKey: "nav.items.lieferungen", icon: Truck },
+      { href: "/reisecheckliste", labelKey: "nav.items.reisecheckliste", icon: Plane },
+      { href: "/baby", labelKey: "nav.items.baby", icon: Baby },
+      { href: "/reisen", labelKey: "nav.items.reisen", icon: Plane },
+      { href: "/haushaltskasse", labelKey: "nav.items.haushaltskasse", icon: Banknote },
     ],
   },
   {
@@ -108,12 +114,11 @@ const sections: NavSection[] = [
     items: [
       { href: "/finanzen/dashboard", labelKey: "nav.items.uebersicht", icon: LayoutDashboard },
       { href: "/finanzen/ausgaben", labelKey: "nav.items.ausgaben", icon: Receipt },
-      { href: "/finanzen/investitionen", labelKey: "nav.items.investitionen", icon: TrendingUp },
+      { href: "/finanzen/fixkosten", labelKey: "nav.items.fixkosten", icon: Lock },
       { href: "/finanzen/sparziele", labelKey: "nav.items.sparziele", icon: PiggyBank },
       { href: "/finanzen/monatsplan", labelKey: "nav.items.monatsplan", icon: CalendarClock },
       { href: "/finanzen/gehalt", labelKey: "nav.items.gehalt", icon: Wallet },
       { href: "/finanzen/berichte", labelKey: "nav.items.berichte", icon: FileBarChart },
-      { href: "/energie", labelKey: "nav.items.energie", icon: Zap },
     ],
   },
   {
@@ -157,6 +162,14 @@ export default function Sidebar() {
 
   const [openSection, setOpenSection] = useState<string | null>(activeSection);
 
+  // Auto-open section on navigation
+  useEffect(() => {
+    const current = sections.find((s) =>
+      s.items.some((item) => pathname === item.href || pathname.startsWith(item.href + "/"))
+    )?.id ?? null;
+    if (current) setOpenSection(current);
+  }, [pathname]);
+
   const toggleSection = (id: string) => {
     setOpenSection((prev) => (prev === id ? null : id));
   };
@@ -167,56 +180,65 @@ export default function Sidebar() {
       : pathname.startsWith(href);
 
   return (
-    <aside className="hidden md:flex flex-col w-64 h-screen sticky top-0 bg-white dark:bg-gray-950 border-e border-gray-200 dark:border-gray-800 flex-shrink-0 overflow-y-auto">
+    <aside
+      className="hidden md:flex flex-col w-64 h-screen sticky top-0 flex-shrink-0 overflow-y-auto border-e"
+      style={{
+        background: "var(--sidebar-bg)",
+        borderColor: "var(--sidebar-border)",
+      }}
+    >
       {/* Brand */}
-      <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-800">
-        <Link href="/dashboard" className="flex items-center gap-2.5">
-          <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-sm">
+      <div className="px-5 py-4 border-b" style={{ borderColor: "var(--sidebar-border)" }}>
+        <Link href="/dashboard" className="flex items-center gap-2.5 group">
+          <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-sm transition-transform group-hover:scale-105">
             <Home className="h-5 w-5 text-white" />
           </div>
-          <span className="text-xl font-bold text-gray-900 dark:text-white">HomeHub</span>
+          <span className="text-lg font-bold" style={{ color: "var(--foreground)" }}>HomeHub</span>
         </Link>
       </div>
 
       {/* Dashboard link */}
-      <div className="px-3 pt-3">
+      <div className="px-3 pt-4">
         <Link
           href="/dashboard"
           className={cn(
-            "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
+            "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 btn-press",
             pathname === "/dashboard"
-              ? "bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300"
-              : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+              ? "bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 shadow-sm"
+              : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"
           )}
         >
-          <LayoutDashboard className={cn("h-5 w-5", pathname === "/dashboard" ? "text-indigo-600" : "text-gray-400")} />
+          <LayoutDashboard className={cn("h-[18px] w-[18px]", pathname === "/dashboard" ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500")} />
           {t("nav.dashboard")}
         </Link>
       </div>
 
       {/* Sections */}
-      <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto">
         {sections.map((section) => {
           const SectionIcon = section.icon;
+          const isOpen = openSection === section.id;
 
           return (
             <div key={section.id}>
               <button
                 onClick={() => toggleSection(section.id)}
-                className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs font-semibold text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-150"
+                className="flex items-center justify-between w-full px-3 py-[7px] rounded-lg text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-150"
               >
                 <div className="flex items-center gap-2">
-                  <SectionIcon className={cn("h-4 w-4", section.color)} />
+                  <SectionIcon className={cn("h-3.5 w-3.5", section.color)} />
                   {t(section.labelKey)}
                 </div>
-                {openSection === section.id ? (
-                  <ChevronDown className="h-3.5 w-3.5" />
-                ) : (
-                  <ChevronRight className="h-3.5 w-3.5" />
-                )}
+                <ChevronDown
+                  className={cn(
+                    "h-3 w-3 transition-transform duration-200",
+                    isOpen ? "rotate-180" : "-rotate-90"
+                  )}
+                />
               </button>
 
-              {openSection === section.id && (
+              {/* Animated collapsible section */}
+              <div className="sidebar-section-items" data-open={isOpen}>
                 <ul className="mt-0.5 space-y-0.5 ps-2">
                   {section.items.map(({ href, labelKey, icon: Icon, badge }) => {
                     const active = isActive(href);
@@ -228,16 +250,16 @@ export default function Sidebar() {
                         <Link
                           href={href}
                           className={cn(
-                            "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150",
+                            "flex items-center gap-3 px-3 py-[7px] rounded-lg text-[13px] font-medium transition-all duration-150 btn-press",
                             active
-                              ? "bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300"
-                              : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                              ? "bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 shadow-sm"
+                              : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"
                           )}
                         >
                           <div className="relative flex-shrink-0">
-                            <Icon className={cn("h-4 w-4", active ? "text-blue-600 dark:text-blue-400" : "text-gray-400")} />
+                            <Icon className={cn("h-4 w-4", active ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500")} />
                             {showBadge && (
-                              <span className="absolute -top-1.5 -end-1.5 flex items-center justify-center min-w-[14px] h-3.5 px-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full leading-none">
+                              <span className="absolute -top-1.5 -end-1.5 flex items-center justify-center min-w-[14px] h-3.5 px-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full leading-none animate-pulse-dot">
                                 {badgeNum > 99 ? "99+" : badgeNum}
                               </span>
                             )}
@@ -248,25 +270,25 @@ export default function Sidebar() {
                     );
                   })}
                 </ul>
-              )}
+              </div>
             </div>
           );
         })}
       </nav>
 
       {/* Language + Theme + User */}
-      <div className="px-3 py-3 border-t border-gray-100 dark:border-gray-800 space-y-2">
+      <div className="px-3 py-3 border-t space-y-2" style={{ borderColor: "var(--sidebar-border)" }}>
         {isAdmin && (
           <Link
             href="/admin"
             className={cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
+              "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 btn-press",
               pathname.startsWith("/admin")
-                ? "bg-yellow-50 dark:bg-yellow-950 text-yellow-700 dark:text-yellow-300"
-                : "text-gray-600 dark:text-gray-400 hover:bg-yellow-50 dark:hover:bg-yellow-950 hover:text-yellow-700"
+                ? "bg-yellow-50 dark:bg-yellow-950/50 text-yellow-700 dark:text-yellow-300"
+                : "text-gray-600 dark:text-gray-400 hover:bg-yellow-50 dark:hover:bg-yellow-950/30 hover:text-yellow-700"
             )}
           >
-            <ShieldCheck className="h-5 w-5" />
+            <ShieldCheck className="h-[18px] w-[18px]" />
             Admin Panel
           </Link>
         )}

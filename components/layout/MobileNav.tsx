@@ -7,8 +7,9 @@ import {
   Menu, X, Home, LayoutDashboard, ChefHat, Package, Wallet, LayoutGrid,
   UtensilsCrossed, BarChart3, Settings, ScanLine, Bell, ShoppingCart,
   ArrowLeftRight, ClipboardList, Pill, Gift, FileText, Calendar, Sparkles,
-  Truck, Receipt, TrendingUp, PiggyBank, CalendarClock, FileBarChart, Zap,
-  Users, MessageCircle, Activity, Car, PawPrint, ChevronDown, ChevronRight,
+  Truck, Receipt, TrendingUp, PiggyBank, CalendarClock, FileBarChart,
+  Users, MessageCircle, Activity, Car, PawPrint, ChevronDown, ChevronRight, Plane,
+  Baby, Banknote, Lock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAlertCount } from "@/hooks/useAlertCount";
@@ -50,7 +51,10 @@ const sections: NavSection[] = [
       { href: "/dokumente", labelKey: "nav.items.dokumente", icon: FileText },
       { href: "/kalender", labelKey: "nav.items.kalender", icon: Calendar },
       { href: "/reinigung", labelKey: "nav.items.reinigung", icon: Sparkles },
-      { href: "/lieferungen", labelKey: "nav.items.lieferungen", icon: Truck },
+      { href: "/reisecheckliste", labelKey: "nav.items.reisecheckliste", icon: Plane },
+      { href: "/baby", labelKey: "nav.items.baby", icon: Baby },
+      { href: "/reisen", labelKey: "nav.items.reisen", icon: Plane },
+      { href: "/haushaltskasse", labelKey: "nav.items.haushaltskasse", icon: Banknote },
     ],
   },
   {
@@ -58,12 +62,11 @@ const sections: NavSection[] = [
     items: [
       { href: "/finanzen/dashboard", labelKey: "nav.items.uebersicht", icon: LayoutDashboard },
       { href: "/finanzen/ausgaben", labelKey: "nav.items.ausgaben", icon: Receipt },
-      { href: "/finanzen/investitionen", labelKey: "nav.items.investitionen", icon: TrendingUp },
+      { href: "/finanzen/fixkosten", labelKey: "nav.items.fixkosten", icon: Lock },
       { href: "/finanzen/sparziele", labelKey: "nav.items.sparziele", icon: PiggyBank },
       { href: "/finanzen/monatsplan", labelKey: "nav.items.monatsplan", icon: CalendarClock },
       { href: "/finanzen/gehalt", labelKey: "nav.items.gehalt", icon: Wallet },
       { href: "/finanzen/berichte", labelKey: "nav.items.berichte", icon: FileBarChart },
-      { href: "/energie", labelKey: "nav.items.energie", icon: Zap },
     ],
   },
   {
@@ -102,33 +105,49 @@ export default function MobileNav() {
   // Close drawer on navigation
   useEffect(() => { setOpen(false); }, [pathname]);
 
+  // Auto-open section on navigation
+  useEffect(() => {
+    const current = sections.find((s) =>
+      s.items.some((item) => pathname === item.href || pathname.startsWith(item.href + "/"))
+    )?.id ?? null;
+    if (current) setOpenSection(current);
+  }, [pathname]);
+
   const isActive = (href: string) =>
     href === "/kueche" || href === "/vorrat" ? pathname === href : pathname.startsWith(href);
 
   return (
     <>
       {/* Top bar — mobile only */}
-      <header className="md:hidden fixed top-0 inset-x-0 z-40 h-14 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4">
+      <header
+        className="md:hidden fixed top-0 inset-x-0 z-40 h-14 backdrop-blur-md border-b flex items-center justify-between px-4"
+        style={{
+          background: "color-mix(in srgb, var(--sidebar-bg) 85%, transparent)",
+          borderColor: "var(--sidebar-border)",
+        }}
+      >
         <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
             <Home className="h-4 w-4 text-white" />
           </div>
-          <span className="font-bold text-gray-900 dark:text-white">HomeHub</span>
+          <span className="font-bold" style={{ color: "var(--foreground)" }}>HomeHub</span>
         </Link>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <Link
             href="/benachrichtigungen"
-            className="relative p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors"
+            style={{ color: "var(--muted)" }}
           >
             <Bell className="h-5 w-5" />
             {notificationCount > 0 && (
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full animate-pulse-dot" />
             )}
           </Link>
           <LanguageToggle />
           <button
             onClick={() => setOpen(true)}
-            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors"
+            style={{ color: "var(--muted)" }}
             aria-label={t("nav.navigation")}
           >
             <Menu className="h-5 w-5" />
@@ -139,29 +158,29 @@ export default function MobileNav() {
       {/* Overlay */}
       {open && (
         <div
-          className="md:hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+          className="md:hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm animate-overlay"
           onClick={() => setOpen(false)}
         />
       )}
 
-      {/* Drawer — slides from right in LTR, from left in RTL */}
+      {/* Drawer */}
       <div
         className={cn(
-          "md:hidden fixed top-0 z-50 h-full w-80 max-w-[85vw] bg-white dark:bg-gray-950 shadow-2xl flex flex-col transition-transform duration-300",
-          isRTL ? "left-0" : "right-0",
-          open
-            ? "translate-x-0"
-            : isRTL
-            ? "-translate-x-full"
-            : "translate-x-full"
+          "md:hidden fixed top-0 z-50 h-full w-80 max-w-[85vw] shadow-2xl flex flex-col drawer-content",
+          isRTL ? "left-0" : "right-0"
         )}
+        data-open={open}
+        style={{
+          background: "var(--sidebar-bg)",
+        }}
       >
         {/* Drawer header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
-          <span className="font-bold text-gray-900 dark:text-white text-lg">{t("nav.navigation")}</span>
+        <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: "var(--sidebar-border)" }}>
+          <span className="font-bold text-lg" style={{ color: "var(--foreground)" }}>{t("nav.navigation")}</span>
           <button
             onClick={() => setOpen(false)}
-            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors"
+            style={{ color: "var(--muted)" }}
           >
             <X className="h-5 w-5" />
           </button>
@@ -172,19 +191,20 @@ export default function MobileNav() {
           <Link
             href="/dashboard"
             className={cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+              "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 btn-press",
               pathname === "/dashboard"
-                ? "bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300"
-                : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                ? "bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300"
+                : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
             )}
+            style={!pathname.startsWith("/dashboard") ? { color: "var(--foreground)" } : undefined}
           >
-            <LayoutDashboard className={cn("h-5 w-5", pathname === "/dashboard" ? "text-indigo-600" : "text-gray-400")} />
+            <LayoutDashboard className={cn("h-[18px] w-[18px]", pathname === "/dashboard" ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500")} />
             {t("nav.dashboard")}
           </Link>
         </div>
 
         {/* Sections */}
-        <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto">
           {sections.map((section) => {
             const SectionIcon = section.icon;
             const isThisOpen = openSection === section.id;
@@ -192,15 +212,20 @@ export default function MobileNav() {
               <div key={section.id}>
                 <button
                   onClick={() => setOpenSection(isThisOpen ? null : section.id)}
-                  className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs font-semibold text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  className="flex items-center justify-between w-full px-3 py-[7px] rounded-lg text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-150"
                 >
                   <div className="flex items-center gap-2">
-                    <SectionIcon className={cn("h-4 w-4", section.color)} />
+                    <SectionIcon className={cn("h-3.5 w-3.5", section.color)} />
                     {t(section.labelKey)}
                   </div>
-                  {isThisOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+                  <ChevronDown
+                    className={cn(
+                      "h-3 w-3 transition-transform duration-200",
+                      isThisOpen ? "rotate-180" : "-rotate-90"
+                    )}
+                  />
                 </button>
-                {isThisOpen && (
+                <div className="sidebar-section-items" data-open={isThisOpen}>
                   <ul className="mt-0.5 space-y-0.5 ps-2">
                     {section.items.map(({ href, labelKey, icon: Icon, badge }) => {
                       const active = isActive(href);
@@ -211,16 +236,17 @@ export default function MobileNav() {
                           <Link
                             href={href}
                             className={cn(
-                              "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                              "flex items-center gap-3 px-3 py-[7px] rounded-lg text-[13px] font-medium transition-all duration-150 btn-press",
                               active
-                                ? "bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300"
-                                : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                                ? "bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300"
+                                : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
                             )}
+                            style={!active ? { color: "var(--foreground)" } : undefined}
                           >
                             <div className="relative flex-shrink-0">
-                              <Icon className={cn("h-4 w-4", active ? "text-blue-600 dark:text-blue-400" : "text-gray-400")} />
+                              <Icon className={cn("h-4 w-4", active ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500")} />
                               {showBadge && (
-                                <span className="absolute -top-1.5 -end-1.5 flex items-center justify-center min-w-[14px] h-3.5 px-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full">
+                                <span className="absolute -top-1.5 -end-1.5 flex items-center justify-center min-w-[14px] h-3.5 px-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full leading-none animate-pulse-dot">
                                   {badgeNum > 99 ? "99+" : badgeNum}
                                 </span>
                               )}
@@ -231,14 +257,14 @@ export default function MobileNav() {
                       );
                     })}
                   </ul>
-                )}
+                </div>
               </div>
             );
           })}
         </nav>
 
         {/* Language + Theme + User */}
-        <div className="px-3 py-3 border-t border-gray-100 dark:border-gray-800 space-y-2">
+        <div className="px-3 py-3 border-t space-y-2" style={{ borderColor: "var(--sidebar-border)" }}>
           <div className="flex items-center justify-between px-3">
             <span className="text-xs text-gray-400">{t("nav.language")}</span>
             <LanguageToggle />
@@ -251,8 +277,14 @@ export default function MobileNav() {
         </div>
       </div>
 
-      {/* Bottom tab bar — quick access */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 z-40">
+      {/* Bottom tab bar */}
+      <nav
+        className="md:hidden fixed bottom-0 inset-x-0 z-40 backdrop-blur-md border-t"
+        style={{
+          background: "color-mix(in srgb, var(--sidebar-bg) 90%, transparent)",
+          borderColor: "var(--sidebar-border)",
+        }}
+      >
         <ul className="flex items-center justify-around h-16">
           {[
             { href: "/", icon: LayoutDashboard, labelKey: "nav.items.home", exact: true },
@@ -267,12 +299,12 @@ export default function MobileNav() {
                 <Link
                   href={href}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-0.5 py-2 transition-colors",
+                    "flex flex-col items-center justify-center gap-0.5 py-2 transition-colors duration-150 btn-press",
                     active ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-600"
                   )}
                 >
-                  <Icon className="h-5 w-5" />
-                  <span className="text-[10px] font-medium">{t(labelKey)}</span>
+                  <Icon className={cn("h-5 w-5", active && "drop-shadow-sm")} />
+                  <span className={cn("text-[10px] font-medium", active && "font-semibold")}>{t(labelKey)}</span>
                 </Link>
               </li>
             );

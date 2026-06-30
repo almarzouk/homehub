@@ -12,8 +12,10 @@ import {
   ShoppingCart,
   Clock,
 } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, cn } from "@/lib/utils";
 import { useTranslation } from "@/hooks/useTranslation";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { LoadingState, SkeletonCard, SkeletonStat } from "@/components/ui/LoadingState";
 
 interface DashboardData {
   totalSalary: number;
@@ -29,19 +31,37 @@ interface DashboardData {
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
 
   useEffect(() => {
     fetch("/api/dashboard")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error("Fehler beim Laden");
+        return r.json();
+      })
       .then(setData)
+      .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-64">
-        <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      <div className="space-y-8">
+        <PageHeader title={t("dashboard.title")} subtitle={t("dashboard.welcome")} />
+        <LoadingState variant="skeleton" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-8">
+        <PageHeader title={t("dashboard.title")} subtitle={t("dashboard.welcome")} />
+        <div className="rounded-2xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-6 text-center">
+          <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-2" />
+          <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
+        </div>
       </div>
     );
   }
@@ -54,108 +74,168 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("dashboard.title")}</h1>
-        <p className="text-gray-500 text-sm mt-1">{t("dashboard.welcome")}</p>
-      </div>
+      <PageHeader title={t("dashboard.title")} subtitle={t("dashboard.welcome")} />
 
+      {/* Module Cards */}
       <section>
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">{t("dashboard.modules")}</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Link href="/kueche" className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 hover:shadow-md transition-shadow flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-orange-500"><ChefHat className="h-6 w-6 text-white" /></div>
-            <div>
-              <p className="text-sm text-gray-500">{t("nav.sections.kueche")}</p>
-              <p className="text-xl font-bold text-gray-900 dark:text-white">{data?.kueche.total ?? 0} {t("dashboard.recipes")}</p>
+        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-3">{t("dashboard.modules")}</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 stagger-children">
+          <Link
+            href="/kueche"
+            className="block rounded-2xl border p-5 card-hover"
+            style={{ background: "var(--card-bg)", borderColor: "var(--card-border)" }}
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-orange-400 to-red-500 shadow-sm">
+                <ChefHat className="h-6 w-6 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm" style={{ color: "var(--muted)" }}>{t("nav.sections.kueche")}</p>
+                <p className="text-xl font-bold" style={{ color: "var(--foreground)" }}>
+                  {data?.kueche.total ?? 0} {t("dashboard.recipes")}
+                </p>
+              </div>
             </div>
           </Link>
-          <Link href="/vorrat" className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 hover:shadow-md transition-shadow flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-blue-500"><Package className="h-6 w-6 text-white" /></div>
-            <div className="flex-1">
-              <p className="text-sm text-gray-500">{t("nav.sections.vorrat")}</p>
-              <p className="text-xl font-bold text-gray-900 dark:text-white">{data?.vorrat.total ?? 0} {t("dashboard.products")}</p>
+
+          <Link
+            href="/vorrat"
+            className="block rounded-2xl border p-5 card-hover"
+            style={{ background: "var(--card-bg)", borderColor: "var(--card-border)" }}
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-400 to-indigo-500 shadow-sm">
+                <Package className="h-6 w-6 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm" style={{ color: "var(--muted)" }}>{t("nav.sections.vorrat")}</p>
+                <p className="text-xl font-bold" style={{ color: "var(--foreground)" }}>
+                  {data?.vorrat.total ?? 0} {t("dashboard.products")}
+                </p>
+              </div>
+              {alerts > 0 && (
+                <span className="flex-shrink-0 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-sm animate-pulse-dot">
+                  {alerts}
+                </span>
+              )}
             </div>
-            {alerts > 0 && <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{alerts}</span>}
           </Link>
-          <Link href="/finanzen/dashboard" className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 hover:shadow-md transition-shadow flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-emerald-500"><Wallet className="h-6 w-6 text-white" /></div>
-            <div>
-              <p className="text-sm text-gray-500">{t("nav.sections.finanzen")}</p>
-              <p className="text-xl font-bold text-gray-900 dark:text-white">{formatCurrency(data?.remainingBalance ?? 0, data?.currency ?? "EUR")}</p>
+
+          <Link
+            href="/finanzen/dashboard"
+            className="block rounded-2xl border p-5 card-hover"
+            style={{ background: "var(--card-bg)", borderColor: "var(--card-border)" }}
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-emerald-400 to-teal-500 shadow-sm">
+                <Wallet className="h-6 w-6 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm" style={{ color: "var(--muted)" }}>{t("nav.sections.finanzen")}</p>
+                <p className="text-xl font-bold" style={{ color: "var(--foreground)" }}>
+                  {formatCurrency(data?.remainingBalance ?? 0, data?.currency ?? "EUR")}
+                </p>
+              </div>
             </div>
           </Link>
         </div>
       </section>
 
+      {/* Stock Warnings */}
       {data && alerts > 0 && (
         <section>
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">{t("dashboard.stockWarnings")}</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <h2 className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-3">{t("dashboard.stockWarnings")}</h2>
+          <div className="grid grid-cols-2 gap-3 stagger-children">
             {data.vorrat.outOfStock > 0 && (
-              <Link href="/vorrat/warnungen" className="bg-red-50 dark:bg-red-950 rounded-xl p-4 flex items-center gap-3 hover:bg-red-100 transition-colors">
-                <AlertTriangle className="h-5 w-5 text-red-500" />
-                <div><p className="text-xs text-gray-500">{t("dashboard.outOfStock")}</p><p className="font-semibold text-gray-900 dark:text-white">{data.vorrat.outOfStock}</p></div>
+              <Link
+                href="/vorrat/warnungen"
+                className="rounded-xl p-4 flex items-center gap-3 transition-colors duration-150 hover:opacity-90"
+                style={{ background: "var(--danger-subtle)" }}
+              >
+                <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0" />
+                <div>
+                  <p className="text-xs" style={{ color: "var(--muted)" }}>{t("dashboard.outOfStock")}</p>
+                  <p className="font-semibold" style={{ color: "var(--foreground)" }}>{data.vorrat.outOfStock}</p>
+                </div>
               </Link>
             )}
             {data.vorrat.lowStock > 0 && (
-              <Link href="/vorrat/warnungen" className="bg-yellow-50 dark:bg-yellow-950 rounded-xl p-4 flex items-center gap-3 hover:bg-yellow-100 transition-colors">
-                <TrendingDown className="h-5 w-5 text-yellow-500" />
-                <div><p className="text-xs text-gray-500">{t("dashboard.lowStock")}</p><p className="font-semibold text-gray-900 dark:text-white">{data.vorrat.lowStock}</p></div>
+              <Link
+                href="/vorrat/warnungen"
+                className="rounded-xl p-4 flex items-center gap-3 transition-colors duration-150 hover:opacity-90"
+                style={{ background: "var(--warning-subtle)" }}
+              >
+                <TrendingDown className="h-5 w-5 text-amber-500 flex-shrink-0" />
+                <div>
+                  <p className="text-xs" style={{ color: "var(--muted)" }}>{t("dashboard.lowStock")}</p>
+                  <p className="font-semibold" style={{ color: "var(--foreground)" }}>{data.vorrat.lowStock}</p>
+                </div>
               </Link>
             )}
             {data.vorrat.expired > 0 && (
-              <Link href="/vorrat/warnungen" className="bg-red-50 dark:bg-red-950 rounded-xl p-4 flex items-center gap-3">
-                <Clock className="h-5 w-5 text-red-500" />
-                <div><p className="text-xs text-gray-500">{t("dashboard.expired")}</p><p className="font-semibold text-gray-900 dark:text-white">{data.vorrat.expired}</p></div>
+              <Link
+                href="/vorrat/warnungen"
+                className="rounded-xl p-4 flex items-center gap-3 transition-colors duration-150 hover:opacity-90"
+                style={{ background: "var(--danger-subtle)" }}
+              >
+                <Clock className="h-5 w-5 text-red-500 flex-shrink-0" />
+                <div>
+                  <p className="text-xs" style={{ color: "var(--muted)" }}>{t("dashboard.expired")}</p>
+                  <p className="font-semibold" style={{ color: "var(--foreground)" }}>{data.vorrat.expired}</p>
+                </div>
               </Link>
             )}
           </div>
         </section>
       )}
 
+      {/* Finance Month */}
       {data && data.totalSalary > 0 && (
         <section>
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">{t("dashboard.financeMonth")}</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="bg-emerald-50 dark:bg-emerald-950 rounded-xl p-4">
-              <p className="text-xs text-gray-500">{t("dashboard.salary")}</p>
-              <p className="font-semibold text-emerald-700 dark:text-emerald-400">{formatCurrency(data.totalSalary, data.currency)}</p>
+          <h2 className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-3">{t("dashboard.financeMonth")}</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 stagger-children">
+            <div className="rounded-xl p-4" style={{ background: "var(--success-subtle)" }}>
+              <p className="text-xs" style={{ color: "var(--muted)" }}>{t("dashboard.salary")}</p>
+              <p className="font-semibold text-emerald-600 dark:text-emerald-400">{formatCurrency(data.totalSalary, data.currency)}</p>
             </div>
-            <div className="bg-red-50 dark:bg-red-950 rounded-xl p-4">
-              <p className="text-xs text-gray-500">{t("dashboard.expenses")}</p>
-              <p className="font-semibold text-red-700 dark:text-red-400">{formatCurrency(data.totalExpenses, data.currency)}</p>
+            <div className="rounded-xl p-4" style={{ background: "var(--danger-subtle)" }}>
+              <p className="text-xs" style={{ color: "var(--muted)" }}>{t("dashboard.expenses")}</p>
+              <p className="font-semibold text-red-600 dark:text-red-400">{formatCurrency(data.totalExpenses, data.currency)}</p>
             </div>
-            <div className="bg-blue-50 dark:bg-blue-950 rounded-xl p-4">
-              <p className="text-xs text-gray-500">{t("dashboard.invested")}</p>
-              <p className="font-semibold text-blue-700 dark:text-blue-400">{formatCurrency(data.totalInvested, data.currency)}</p>
+            <div className="rounded-xl p-4" style={{ background: "var(--accent-subtle)" }}>
+              <p className="text-xs" style={{ color: "var(--muted)" }}>{t("dashboard.invested")}</p>
+              <p className="font-semibold text-blue-600 dark:text-blue-400">{formatCurrency(data.totalInvested, data.currency)}</p>
             </div>
-            <div className={`rounded-xl p-4 ${data.remainingBalance >= 0 ? "bg-emerald-50 dark:bg-emerald-950" : "bg-red-50 dark:bg-red-950"}`}>
-              <p className="text-xs text-gray-500">{t("dashboard.remaining")}</p>
-              <p className={`font-semibold ${data.remainingBalance >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-red-700 dark:text-red-400"}`}>{formatCurrency(data.remainingBalance, data.currency)}</p>
+            <div className="rounded-xl p-4" style={{ background: data.remainingBalance >= 0 ? "var(--success-subtle)" : "var(--danger-subtle)" }}>
+              <p className="text-xs" style={{ color: "var(--muted)" }}>{t("dashboard.remaining")}</p>
+              <p className={cn("font-semibold", data.remainingBalance >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400")}>
+                {formatCurrency(data.remainingBalance, data.currency)}
+              </p>
             </div>
           </div>
         </section>
       )}
 
+      {/* Quick Access */}
       <section>
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">{t("dashboard.quickAccess")}</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <Link href="/kueche/neu" className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-4 text-center hover:shadow-md transition-shadow">
-            <ChefHat className="h-6 w-6 text-orange-500 mx-auto mb-1.5" />
-            <p className="text-xs font-medium text-gray-600 dark:text-gray-400">{t("dashboard.newRecipe")}</p>
-          </Link>
-          <Link href="/vorrat/produkte/neu" className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-4 text-center hover:shadow-md transition-shadow">
-            <Package className="h-6 w-6 text-blue-500 mx-auto mb-1.5" />
-            <p className="text-xs font-medium text-gray-600 dark:text-gray-400">{t("dashboard.addProduct")}</p>
-          </Link>
-          <Link href="/vorrat/einkaufsliste" className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-4 text-center hover:shadow-md transition-shadow">
-            <ShoppingCart className="h-6 w-6 text-purple-500 mx-auto mb-1.5" />
-            <p className="text-xs font-medium text-gray-600 dark:text-gray-400">{t("dashboard.shoppingList")}</p>
-          </Link>
-          <Link href="/finanzen/ausgaben" className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-4 text-center hover:shadow-md transition-shadow">
-            <Star className="h-6 w-6 text-emerald-500 mx-auto mb-1.5" />
-            <p className="text-xs font-medium text-gray-600 dark:text-gray-400">{t("dashboard.trackExpense")}</p>
-          </Link>
+        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-3">{t("dashboard.quickAccess")}</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 stagger-children">
+          {[
+            { href: "/kueche/neu", icon: ChefHat, color: "text-orange-500", label: t("dashboard.newRecipe") },
+            { href: "/vorrat/neu", icon: Package, color: "text-blue-500", label: t("dashboard.addProduct") },
+            { href: "/einkaufsliste", icon: ShoppingCart, color: "text-purple-500", label: t("dashboard.shoppingList") },
+            { href: "/finanzen/ausgaben", icon: Star, color: "text-emerald-500", label: t("dashboard.trackExpense") },
+          ].map(({ href, icon: Icon, color, label }) => (
+            <Link
+              key={href}
+              href={href}
+              className="block rounded-xl border p-4 text-center card-hover"
+              style={{ background: "var(--card-bg)", borderColor: "var(--card-border)" }}
+            >
+              <Icon className={cn("h-6 w-6 mx-auto mb-2", color)} />
+              <p className="text-xs font-medium" style={{ color: "var(--muted)" }}>{label}</p>
+            </Link>
+          ))}
         </div>
       </section>
     </div>
