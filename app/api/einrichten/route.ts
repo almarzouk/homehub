@@ -50,6 +50,7 @@ export async function POST(request: Request) {
       email: email.trim().toLowerCase(),
       password: hashedPassword,
       role: "admin",
+      onboardingCompleted: false,
     });
 
     // Create household for first user

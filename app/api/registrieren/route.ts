@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
       await household.save();
     }
 
-    // Create user
+    // Create user — new household owners start onboarding; members joining skip it
     const user = await User.create({
       name: name.trim(),
       email: email.toLowerCase().trim(),
@@ -57,6 +57,7 @@ export async function POST(request: NextRequest) {
       role: "user",
       isApproved: false,
       householdId: household._id,
+      onboardingCompleted: !!inviteCode?.trim(), // joining = true, new household = false
     });
 
     // If creating new household, set ownerId and add to members

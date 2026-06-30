@@ -8,6 +8,7 @@ export interface IUserDocument extends Document {
   isBlocked: boolean;
   isApproved: boolean;
   householdId?: Types.ObjectId;
+  onboardingCompleted: boolean;
   aiMonthlyLimit: number;
   aiRequestsThisMonth: number;
   aiRequestsMonth: string;
@@ -24,6 +25,7 @@ const UserSchema = new Schema<IUserDocument>(
     isBlocked: { type: Boolean, default: false },
     isApproved: { type: Boolean, default: true },
     householdId: { type: Schema.Types.ObjectId, ref: "Household", index: true },
+    onboardingCompleted: { type: Boolean, default: true },
     // AI usage tracking
     aiMonthlyLimit: { type: Number, default: 10 },
     aiRequestsThisMonth: { type: Number, default: 0 },

@@ -17,14 +17,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.id = user.id;
         token.role = (user as { role?: string }).role;
         token.householdId = (user as { householdId?: string }).householdId;
+        token.onboardingCompleted = (user as { onboardingCompleted?: boolean }).onboardingCompleted;
       }
-      // Refresh householdId from DB if missing in stale JWT
-      if (token.id && !token.householdId && trigger !== "signIn") {
+      // Re-fetch dynamic fields from DB: on update trigger (after setup completion)
+      // or when householdId is missing in a stale JWT
+      const needsRefresh = trigger === "update" || (token.id && !token.householdId && trigger !== "signIn");
+      if (token.id && needsRefresh) {
         try {
           await connectDB();
-          const dbUser = await User.findById(token.id).lean() as { householdId?: unknown } | null;
+          const dbUser = await User.findById(token.id).lean() as { householdId?: unknown; onboardingCompleted?: boolean } | null;
           if (dbUser?.householdId) {
             token.householdId = String(dbUser.householdId);
+          }
+          if (dbUser && typeof dbUser.onboardingCompleted === "boolean") {
+            token.onboardingCompleted = dbUser.onboardingCompleted;
           }
         } catch { /* ignore */ }
       }
@@ -69,6 +75,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             email: user.email,
             role: user.role,
             householdId: user.householdId ? String(user.householdId) : undefined,
+            onboardingCompleted: user.onboardingCompleted,
           };
         } catch (error) {
           console.error("[Auth] authorize error:", error);

@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getApiSession } from "@/lib/api-auth";
 import { connectDB } from "@/lib/db";
 import Household from "@/models/Household";
@@ -33,5 +33,25 @@ export async function GET() {
   } catch (e) {
     console.error("GET /api/mein-haushalt:", e);
     return NextResponse.json({ error: "Ladefehler" }, { status: 500 });
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  const session = await getApiSession();
+  if (!session) return NextResponse.json({ error: "Nicht autorisiert" }, { status: 401 });
+
+  try {
+    await connectDB();
+    const householdId = (session.user as { householdId?: string }).householdId;
+    if (!householdId) return NextResponse.json({ error: "Kein Haushalt" }, { status: 400 });
+
+    const { name } = await req.json();
+    if (!name?.trim()) return NextResponse.json({ error: "Name darf nicht leer sein" }, { status: 400 });
+
+    await Household.findByIdAndUpdate(householdId, { name: name.trim() });
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    console.error("PUT /api/mein-haushalt:", e);
+    return NextResponse.json({ error: "Speicherfehler" }, { status: 500 });
   }
 }

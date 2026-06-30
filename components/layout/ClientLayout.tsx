@@ -14,7 +14,7 @@ const BARE_PUBLIC_PATHS = ["/landing"];
 // Root `/` is the landing page — it has its own header/footer built in
 const ROOT_PUBLIC = "/";
 // These paths get SessionProvider only (own layout, no user sidebar)
-const STANDALONE_PATHS = ["/admin"];
+const STANDALONE_PATHS = ["/admin", "/setup"];
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
