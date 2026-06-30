@@ -73,7 +73,7 @@ export default function LandingPage() {
   const stats = [
     { value: "500+", label: t("landing.statUsers") },
     { value: "30+", label: t("landing.statFeatures") },
-    { value: "5", label: t("landing.statLangs") },
+    { value: "6", label: t("landing.statLangs") },
     { value: "100%", label: t("landing.statFree") },
   ];
 
@@ -281,7 +281,7 @@ export default function LandingPage() {
           <div className="flex items-center justify-center gap-2 mt-4">
             <Zap className="h-4 w-4 text-yellow-500" />
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              5 {t("landing.statLangs")} · RTL Support
+              6 {t("landing.statLangs")} · RTL Support
             </span>
           </div>
         </div>

@@ -12,6 +12,7 @@ const LANGS: { code: Lang; label: string; flag: string }[] = [
   { code: "ar", label: "العربية",    flag: "🇸🇦" },
   { code: "es", label: "Español",    flag: "🇪🇸" },
   { code: "bg", label: "Български",  flag: "🇧🇬" },
+  { code: "pt", label: "Português (BR)", flag: "🇧🇷" },
 ];
 
 export default function LanguageToggle({ className }: { className?: string }) {

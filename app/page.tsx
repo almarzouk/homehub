@@ -29,6 +29,7 @@ const LANGUAGES: { code: Lang; label: string; native: string }[] = [
   { code: "ar", label: "Arabic", native: "العربية" },
   { code: "es", label: "Spanish", native: "Español" },
   { code: "bg", label: "Bulgarian", native: "Български" },
+  { code: "pt", label: "Portuguese (BR)", native: "Português (BR)" },
 ];
 
 export default function RootPage() {
@@ -70,7 +71,7 @@ export default function RootPage() {
   const stats = [
     { value: "500+", label: t("landing.statUsers") },
     { value: "30+", label: t("landing.statFeatures") },
-    { value: "5", label: t("landing.statLangs") },
+    { value: "6", label: t("landing.statLangs") },
     { value: "100%", label: t("landing.statFree") },
   ];
 
@@ -254,7 +255,7 @@ export default function RootPage() {
           </div>
           <div className="flex items-center justify-center gap-2 mt-4">
             <Zap className="h-4 w-4 text-yellow-500" />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">5 {t("landing.statLangs")} · RTL Support</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">6 {t("landing.statLangs")} · RTL Support</span>
           </div>
         </div>
       </section>

@@ -109,7 +109,7 @@ export default function AusgabenPage() {
     return acc;
   }, {});
 
-  const locale = lang === "ar" ? "ar-SA" : lang === "es" ? "es-ES" : lang === "bg" ? "bg-BG" : lang === "en" ? "en-GB" : "de-DE";
+  const locale = lang === "ar" ? "ar-SA" : lang === "es" ? "es-ES" : lang === "bg" ? "bg-BG" : lang === "en" ? "en-GB" : lang === "pt" ? "pt-BR" : "de-DE";
 
   return (
     <div className="space-y-5">

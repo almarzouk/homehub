@@ -15,7 +15,7 @@ interface WasKochenBody {
   personen: number;
   extra?: string;
   kueche?: string;   // e.g. "syrisch", "libanesisch", "italienisch", ...
-  sprache?: string;  // user's language code: "de", "ar", "en", "es", "bg"
+  sprache?: string;  // user's language code: "de", "ar", "en", "es", "bg", "pt"
 }
 
 // GET — load last cached "Was kochen?" result
@@ -114,6 +114,7 @@ export async function POST(req: NextRequest) {
     en: "Reply ONLY as valid JSON. All text (name, notizen, zutaten) in English.",
     es: "Responde SOLO como JSON válido. Todos los textos (name, notizen, zutaten) en español.",
     bg: "Отговори САМО като валиден JSON. Всички текстове (name, notizen, zutaten) на български.",
+    pt: "Responda APENAS como JSON válido. Todos os textos (name, notizen, zutaten) em português brasileiro.",
   };
   const lang = sprache && langInstructions[sprache] ? sprache : "de";
   const langInstruction = langInstructions[lang];
