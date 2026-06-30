@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import {
   Home, Package, Wallet, ChevronLeft, Check, Loader2,
   Copy, CheckCircle2, Grid3x3, ChevronRight, X, Plus,
@@ -88,7 +87,6 @@ function StepBar({ current, total }: { current: number; total: number }) {
 
 export default function SetupPage() {
   const { update: updateSession } = useSession();
-  const router = useRouter();
 
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -222,11 +220,12 @@ export default function SetupPage() {
     setSaving(true);
     try {
       await fetch("/api/setup/complete", { method: "POST" });
-      await updateSession(); // refresh JWT so onboardingCompleted = true
+      await updateSession();
     } catch { /* ignore */ }
-    setSaving(false);
-    router.push("/dashboard");
-    router.refresh();
+    // Hard redirect so the browser sends the freshly updated JWT cookie.
+    // router.push + router.refresh caused a race where the middleware still
+    // saw onboardingCompleted=false and bounced back to /setup.
+    window.location.href = "/dashboard";
   };
 
   const copyInviteCode = () => {
