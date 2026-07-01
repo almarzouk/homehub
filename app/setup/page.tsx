@@ -220,11 +220,15 @@ export default function SetupPage() {
     setSaving(true);
     try {
       await fetch("/api/setup/complete", { method: "POST" });
-      await updateSession();
+      // Pass an object (even empty) so next-auth POSTs to /api/auth/session
+      // with trigger:"update", causing the JWT callback to re-fetch
+      // onboardingCompleted from the DB and rewrite the cookie.
+      // Calling updateSession() with NO args only does a GET (read-only)
+      // and never updates the cookie, causing the middleware to redirect
+      // back to /setup on the next navigation.
+      await updateSession({});
     } catch { /* ignore */ }
     // Hard redirect so the browser sends the freshly updated JWT cookie.
-    // router.push + router.refresh caused a race where the middleware still
-    // saw onboardingCompleted=false and bounced back to /setup.
     window.location.href = "/dashboard";
   };
 

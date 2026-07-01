@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
       email: email.toLowerCase().trim(),
       password: hashedPassword,
       role: "user",
-      isApproved: false,
+      isApproved: true,
       householdId: household._id,
       onboardingCompleted: !!inviteCode?.trim(), // joining = true, new household = false
     });
