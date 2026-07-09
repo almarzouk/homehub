@@ -18,6 +18,7 @@ import FinanzSetupWizard from "@/components/finanzen/FinanzSetupWizard";
 interface FinanzDashboard {
   totalSalary: number;
   totalExpenses: number;
+  totalFixkosten: number;
   totalInvested: number;
   remainingBalance: number;
   currency: string;
@@ -52,7 +53,6 @@ export default function FinanzenDashboardPage() {
   const { isFinanzSectionEnabled } = useHouseholdConfig();
   const [data, setData] = useState<FinanzDashboard | null>(null);
   const [loading, setLoading] = useState(true);
-  const [fixkostenTotal, setFixkostenTotal] = useState(0);
   const [showSetup, setShowSetup] = useState(false);
   const [setupChecked, setSetupChecked] = useState(false);
 
@@ -86,17 +86,6 @@ export default function FinanzenDashboardPage() {
 
   useEffect(() => { loadDashboard(); }, [loadDashboard]);
 
-  useEffect(() => {
-    fetch("/api/finanzen/fixkosten").then((r) => r.json()).then((items) => {
-      if (Array.isArray(items)) {
-        setFixkostenTotal(
-          items.filter((i: { aktiv: boolean }) => i.aktiv)
-            .reduce((s: number, i: { betrag: number }) => s + i.betrag, 0)
-        );
-      }
-    });
-  }, []);
-
   const handleDeposit = async (id: string, amountCents: number, note?: string) => {
     const res = await fetch(`/api/finanzen/sparziele/${id}/einzahlung`, {
       method: "POST",
@@ -122,7 +111,8 @@ export default function FinanzenDashboardPage() {
   const cur = data?.currency ?? "EUR";
   const salary = data?.totalSalary ?? 0;
   const expenses = data?.totalExpenses ?? 0;
-  const freeAfterFixed = salary - fixkostenTotal;
+  const fixkostenTotal = data?.totalFixkosten ?? 0;
+  const remaining = data?.remainingBalance ?? 0;
   const spentPct = salary > 0 ? Math.min(100, Math.round(((expenses + fixkostenTotal) / salary) * 100)) : 0;
 
   return (
@@ -159,10 +149,10 @@ export default function FinanzenDashboardPage() {
         <div className="relative">
           <div className="flex items-center gap-2 mb-1">
             <Sparkles className="h-4 w-4 text-emerald-200" />
-            <span className="text-sm text-emerald-100 font-medium">{t("finanzen.freeAfterFixed")}</span>
+            <span className="text-sm text-emerald-100 font-medium">{t("finanzen.remaining")}</span>
           </div>
           <p className="text-4xl sm:text-5xl font-bold tracking-tight mb-4">
-            {formatCurrency(freeAfterFixed, cur)}
+            {formatCurrency(remaining, cur)}
           </p>
 
           {salary > 0 && (

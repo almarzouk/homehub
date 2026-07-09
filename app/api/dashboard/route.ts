@@ -6,6 +6,7 @@ import { getCurrentMonth, getLastMonths, monthToDateRange } from "@/lib/utils";
 import SalaryConfig from "@/models/SalaryConfig";
 import Expense from "@/models/Expense";
 import Investment from "@/models/Investment";
+import Fixkosten from "@/models/Fixkosten";
 import FinanzAlert from "@/models/FinanzAlert";
 import SavingsGoal from "@/models/SavingsGoal";
 import Product from "@/models/Product";
@@ -66,6 +67,7 @@ export async function GET(request: NextRequest) {
     savingsGoals,
     gerichteCount,
     favoritCount,
+    fixkosten,
   ] = await Promise.all([
     SalaryConfig.findOne({ month }).lean(),
     Expense.find({ ...hFilter, date: { $gte: start, $lte: end } }).lean(),
@@ -75,13 +77,15 @@ export async function GET(request: NextRequest) {
     SavingsGoal.find({ ...hFilter, isActive: true }).lean(),
     Gericht.countDocuments(hFilter),
     Gericht.countDocuments({ ...hFilter, favorit: true }),
+    Fixkosten.find({ ...hFilter, aktiv: true }).lean(),
   ]);
 
   // Finance summary
   const totalSalary = salary?.amount ?? 0;
   const totalExpenses = expenses.reduce((s, e) => s + e.amount, 0);
+  const totalFixkosten = fixkosten.reduce((s, f) => s + f.betrag, 0);
   const totalInvested = investments.reduce((s, i) => s + i.amount, 0);
-  const remainingBalance = totalSalary - totalExpenses - totalInvested;
+  const remainingBalance = totalSalary - totalExpenses - totalFixkosten - totalInvested;
   const unnecessary = expenses.filter((e) => e.type === "unnecessary");
 
   // Vorrat summary (from aggregation result)
@@ -91,6 +95,7 @@ export async function GET(request: NextRequest) {
     // Finance
     totalSalary,
     totalExpenses,
+    totalFixkosten,
     totalInvested,
     remainingBalance,
     unnecessaryExpensesCount: unnecessary.length,
