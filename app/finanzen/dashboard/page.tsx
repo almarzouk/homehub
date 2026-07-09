@@ -14,13 +14,16 @@ import SavingsBoxCard, { type SavingsBox } from "@/components/finanzen/SavingsBo
 import { useHouseholdConfig } from "@/hooks/useHouseholdConfig";
 import type { FinanzSectionKey } from "@/lib/finanzen-sections";
 import FinanzSetupWizard from "@/components/finanzen/FinanzSetupWizard";
+import { BALANCE_DEDUCTION_REGISTRY, computeDeductedTotal, type BalanceDeductionKey } from "@/lib/finance-balance";
 
 interface FinanzDashboard {
   totalSalary: number;
   totalExpenses: number;
   totalFixkosten: number;
   totalInvested: number;
+  totalSavingsDeposits: number;
   remainingBalance: number;
+  balanceDeductions: BalanceDeductionKey[];
   currency: string;
   recentExpenses: { _id: string; title: string; amount: number; category: string; date: string; type: string }[];
   unreadAlerts: { _id: string; title: string; message: string; type: string }[];
@@ -113,7 +116,20 @@ export default function FinanzenDashboardPage() {
   const expenses = data?.totalExpenses ?? 0;
   const fixkostenTotal = data?.totalFixkosten ?? 0;
   const remaining = data?.remainingBalance ?? 0;
-  const spentPct = salary > 0 ? Math.min(100, Math.round(((expenses + fixkostenTotal) / salary) * 100)) : 0;
+  const deductions = data?.balanceDeductions ?? ["ausgaben", "fixkosten"];
+  const deductedTotal = computeDeductedTotal(
+    {
+      ausgaben: expenses,
+      fixkosten: fixkostenTotal,
+      investments: data?.totalInvested ?? 0,
+      sparziele: data?.totalSavingsDeposits ?? 0,
+    },
+    deductions
+  );
+  const spentPct = salary > 0 ? Math.min(100, Math.round((deductedTotal / salary) * 100)) : 0;
+  const deductionLabel = deductions
+    .map((key) => t(BALANCE_DEDUCTION_REGISTRY.find((d) => d.key === key)?.labelKey ?? "finanzen.expenses"))
+    .join(" + ");
 
   return (
     <div className="space-y-5 pb-4">
@@ -133,12 +149,13 @@ export default function FinanzenDashboardPage() {
             {t("finanzen.title")}
           </h1>
         </div>
-        <button
-          onClick={() => setShowSetup(true)}
+        <Link
+          href="/einstellungen/finanzen"
           className="p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+          title={t("finanzen.sectionSettings")}
         >
           <Settings className="h-4 w-4" />
-        </button>
+        </Link>
       </div>
 
       {/* Hero balance card */}
@@ -158,7 +175,7 @@ export default function FinanzenDashboardPage() {
           {salary > 0 && (
             <div className="space-y-2">
               <div className="flex justify-between text-xs text-emerald-100">
-                <span>{t("finanzen.expenses")} + {t("finanzen.fixkosten")}</span>
+                <span>{deductionLabel}</span>
                 <span>{spentPct}%</span>
               </div>
               <div className="h-2 bg-white/20 rounded-full overflow-hidden">

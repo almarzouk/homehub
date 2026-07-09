@@ -11,6 +11,13 @@ import FinanzAlert from "@/models/FinanzAlert";
 import SavingsGoal from "@/models/SavingsGoal";
 import Product from "@/models/Product";
 import Gericht from "@/models/Gericht";
+import Household from "@/models/Household";
+import {
+  computeRemainingBalance,
+  resolveBalanceDeductions,
+  sumSavingsDepositsInRange,
+  type BalanceDeductionKey,
+} from "@/lib/finance-balance";
 
 export async function GET(request: NextRequest) {
   const { error, session } = await requireSession();
@@ -85,7 +92,21 @@ export async function GET(request: NextRequest) {
   const totalExpenses = expenses.reduce((s, e) => s + e.amount, 0);
   const totalFixkosten = fixkosten.reduce((s, f) => s + f.betrag, 0);
   const totalInvested = investments.reduce((s, i) => s + i.amount, 0);
-  const remainingBalance = totalSalary - totalExpenses - totalFixkosten - totalInvested;
+  const totalSavingsDeposits = sumSavingsDepositsInRange(savingsGoals, start, end);
+
+  let balanceDeductions: BalanceDeductionKey[] = resolveBalanceDeductions();
+  if (householdId) {
+    const hh = await Household.findById(householdId).select("balanceDeductions").lean();
+    balanceDeductions = resolveBalanceDeductions(hh?.balanceDeductions);
+  }
+
+  const balanceTotals = {
+    ausgaben: totalExpenses,
+    fixkosten: totalFixkosten,
+    investments: totalInvested,
+    sparziele: totalSavingsDeposits,
+  };
+  const remainingBalance = computeRemainingBalance(totalSalary, balanceTotals, balanceDeductions);
   const unnecessary = expenses.filter((e) => e.type === "unnecessary");
 
   // Vorrat summary (from aggregation result)
@@ -97,7 +118,9 @@ export async function GET(request: NextRequest) {
     totalExpenses,
     totalFixkosten,
     totalInvested,
+    totalSavingsDeposits,
     remainingBalance,
+    balanceDeductions,
     unnecessaryExpensesCount: unnecessary.length,
     unnecessaryExpensesTotal: unnecessary.reduce((s, e) => s + e.amount, 0),
     monthlyTrend,

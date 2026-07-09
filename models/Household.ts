@@ -15,6 +15,8 @@ export interface IHouseholdDocument extends Document {
   enabledModules: string[];
   /** Finance sub-sections that are active (empty = all active) */
   enabledFinanzSections: string[];
+  /** Items subtracted from salary when computing remaining balance (empty = ausgaben + fixkosten) */
+  balanceDeductions: string[];
   /**
    * Per-member permission overrides.
    * Shape: { [userId: string]: { [moduleKey: string]: { view: boolean; edit: boolean } } }
@@ -44,6 +46,7 @@ const HouseholdSchema = new Schema<IHouseholdDocument>(
     coAdmins: [{ type: Schema.Types.ObjectId, ref: "User" }],
     enabledModules: { type: [String], default: [] },
     enabledFinanzSections: { type: [String], default: [] },
+    balanceDeductions: { type: [String], default: [] },
     memberPermissions: { type: Schema.Types.Mixed, default: {} },
   },
   { timestamps: true }

@@ -3,7 +3,13 @@ import Fixkosten from "@/models/Fixkosten";
 import Expense from "@/models/Expense";
 import SalaryConfig from "@/models/SalaryConfig";
 import Investment from "@/models/Investment";
+import SavingsGoal from "@/models/SavingsGoal";
 import { getCurrentMonth, monthToDateRange } from "@/lib/utils";
+import {
+  computeRemainingBalance,
+  resolveBalanceDeductions,
+  sumSavingsDepositsInRange,
+} from "@/lib/finance-balance";
 import type { AlertType } from "@/types";
 
 export async function createAlert(data: {
@@ -60,19 +66,27 @@ export async function checkLowBalance(month?: string) {
   if (!salary) return;
 
   const { start, end } = monthToDateRange(currentMonth);
-  const [expenseAgg, investments, fixkosten] = await Promise.all([
+  const [expenseAgg, investments, fixkosten, savingsGoals] = await Promise.all([
     Expense.aggregate([
       { $match: { date: { $gte: start, $lte: end } } },
       { $group: { _id: null, total: { $sum: "$amount" } } },
     ]),
     Investment.find(),
     Fixkosten.find({ aktiv: true }),
+    SavingsGoal.find({ isActive: true }),
   ]);
 
   const totalExpenses = expenseAgg[0]?.total ?? 0;
   const totalFixkosten = fixkosten.reduce((s, f) => s + f.betrag, 0);
   const totalInvested = investments.reduce((s, i) => s + i.amount, 0);
-  const remaining = salary.amount - totalExpenses - totalFixkosten - totalInvested;
+  const totalSavingsDeposits = sumSavingsDepositsInRange(savingsGoals, start, end);
+  const deductions = resolveBalanceDeductions();
+  const remaining = computeRemainingBalance(salary.amount, {
+    ausgaben: totalExpenses,
+    fixkosten: totalFixkosten,
+    investments: totalInvested,
+    sparziele: totalSavingsDeposits,
+  }, deductions);
   const threshold = salary.amount * 0.1;
 
   if (remaining < threshold) {

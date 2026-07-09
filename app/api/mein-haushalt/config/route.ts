@@ -5,6 +5,7 @@ import Household from "@/models/Household";
 import { getUserPermissions } from "@/lib/permissions";
 import { MODULE_REGISTRY } from "@/lib/modules";
 import { FINANZ_SECTION_REGISTRY } from "@/lib/finanzen-sections";
+import { resolveBalanceDeductions } from "@/lib/finance-balance";
 
 /**
  * GET /api/mein-haushalt/config
@@ -23,6 +24,7 @@ export async function GET() {
 
   let enabledModules: string[] = MODULE_REGISTRY.map((m) => m.key);
   let enabledFinanzSections: string[] = FINANZ_SECTION_REGISTRY.map((s) => s.key);
+  let balanceDeductions = resolveBalanceDeductions();
   let permissions: Record<string, { view: boolean; edit: boolean }> = {};
 
   if (householdId) {
@@ -34,6 +36,7 @@ export async function GET() {
       if (hh.enabledFinanzSections && hh.enabledFinanzSections.length > 0) {
         enabledFinanzSections = hh.enabledFinanzSections;
       }
+      balanceDeductions = resolveBalanceDeductions(hh.balanceDeductions);
     }
     const perms = await getUserPermissions(userId, householdId);
     for (const [key, val] of Object.entries(perms)) {
@@ -50,6 +53,7 @@ export async function GET() {
   return NextResponse.json({
     enabledModules,
     enabledFinanzSections,
+    balanceDeductions,
     permissions,
   });
 }

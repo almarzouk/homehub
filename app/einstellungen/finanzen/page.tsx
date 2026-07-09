@@ -5,6 +5,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 import Link from "next/link";
 import { ArrowLeft, ToggleLeft, ToggleRight, Save, Wallet } from "lucide-react";
 import { FINANZ_SECTION_REGISTRY } from "@/lib/finanzen-sections";
+import { BALANCE_DEDUCTION_REGISTRY, type BalanceDeductionKey } from "@/lib/finance-balance";
 import { invalidateHouseholdConfig } from "@/hooks/useHouseholdConfig";
 
 const ALL_SECTION_KEYS = FINANZ_SECTION_REGISTRY.map((s) => s.key);
@@ -12,6 +13,7 @@ const ALL_SECTION_KEYS = FINANZ_SECTION_REGISTRY.map((s) => s.key);
 export default function FinanzSettingsPage() {
   const { t } = useTranslation();
   const [enabled, setEnabled] = useState<Set<string>>(new Set(ALL_SECTION_KEYS));
+  const [deductions, setDeductions] = useState<Set<BalanceDeductionKey>>(new Set(["ausgaben", "fixkosten"]));
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -23,6 +25,8 @@ export default function FinanzSettingsPage() {
       const res = await fetch("/api/mein-haushalt/berechtigungen").then((r) => r.json());
       const sections: string[] = res.enabledFinanzSections ?? [];
       setEnabled(sections.length > 0 ? new Set(sections) : new Set(ALL_SECTION_KEYS));
+      const loadedDeductions: BalanceDeductionKey[] = res.balanceDeductions ?? ["ausgaben", "fixkosten"];
+      setDeductions(new Set(loadedDeductions));
     } catch {
       setError(t("common.error"));
     } finally {
@@ -44,16 +48,37 @@ export default function FinanzSettingsPage() {
     setSaved(false);
   };
 
+  const toggleDeduction = (key: BalanceDeductionKey) => {
+    setDeductions((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        if (next.size <= 1) return prev;
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+    setSaved(false);
+  };
+
   const save = async () => {
     setSaving(true);
     setError("");
     try {
-      const res = await fetch("/api/mein-haushalt/berechtigungen", {
+      const sectionsRes = await fetch("/api/mein-haushalt/berechtigungen", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type: "finanzSections", enabledFinanzSections: Array.from(enabled) }),
       });
-      if (!res.ok) throw new Error((await res.json()).error);
+      if (!sectionsRes.ok) throw new Error((await sectionsRes.json()).error);
+
+      const balanceRes = await fetch("/api/mein-haushalt/berechtigungen", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "balanceDeductions", balanceDeductions: Array.from(deductions) }),
+      });
+      if (!balanceRes.ok) throw new Error((await balanceRes.json()).error);
       invalidateHouseholdConfig();
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
@@ -122,6 +147,38 @@ export default function FinanzSettingsPage() {
             </div>
           );
         })}
+      </div>
+
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">{t("finanzen.balanceCalcTitle")}</h2>
+        <p className="text-sm text-gray-500 mb-3">{t("finanzen.balanceCalcDesc")}</p>
+        <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-xl px-4 py-3 text-sm text-blue-700 dark:text-blue-400 mb-3">
+          {t("finanzen.balanceCalcHint")}
+        </div>
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
+          {BALANCE_DEDUCTION_REGISTRY.map((item) => {
+            const isOn = deductions.has(item.key);
+            return (
+              <div key={item.key} className="flex items-center gap-4 px-4 py-3.5 border-b border-gray-50 dark:border-gray-800 last:border-0">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isOn ? "bg-blue-50 dark:bg-blue-950" : "bg-gray-100 dark:bg-gray-800"}`}>
+                  <Wallet className={`h-5 w-5 ${isOn ? "text-blue-600" : "text-gray-400"}`} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className={`text-sm font-medium ${isOn ? "text-gray-900 dark:text-white" : "text-gray-400"}`}>
+                    {t(item.labelKey)}
+                  </span>
+                </div>
+                <button onClick={() => toggleDeduction(item.key)} className="transition-colors">
+                  {isOn ? (
+                    <ToggleRight className="h-7 w-7 text-blue-500" />
+                  ) : (
+                    <ToggleLeft className="h-7 w-7 text-gray-300 dark:text-gray-700" />
+                  )}
+                </button>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       <button

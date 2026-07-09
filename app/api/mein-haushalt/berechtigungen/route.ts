@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/db";
 import Household from "@/models/Household";
 import { isValidModuleKey, MODULE_REGISTRY } from "@/lib/modules";
 import { isValidFinanzSectionKey, FINANZ_SECTION_REGISTRY } from "@/lib/finanzen-sections";
+import { isValidBalanceDeductionKey, resolveBalanceDeductions } from "@/lib/finance-balance";
 
 /**
  * GET /api/mein-haushalt/berechtigungen
@@ -38,6 +39,7 @@ export async function GET() {
     memberPermissions: hh.memberPermissions ?? {},
     enabledModules: hh.enabledModules ?? [],
     enabledFinanzSections: hh.enabledFinanzSections ?? [],
+    balanceDeductions: resolveBalanceDeductions(hh.balanceDeductions),
     coAdmins: (hh.coAdmins ?? []).map(String),
     ownerId: String(hh.ownerId),
   });
@@ -141,6 +143,23 @@ export async function PUT(req: NextRequest) {
     // Dashboard is always enabled
     if (!filtered.includes("dashboard")) filtered.unshift("dashboard");
     hh.enabledFinanzSections = filtered;
+    await hh.save();
+
+    return NextResponse.json({ success: true });
+  }
+
+  if (type === "balanceDeductions") {
+    const { balanceDeductions } = body as { balanceDeductions: string[] };
+    if (!Array.isArray(balanceDeductions)) {
+      return NextResponse.json({ error: "balanceDeductions muss ein Array sein" }, { status: 400 });
+    }
+
+    const filtered = balanceDeductions.filter(isValidBalanceDeductionKey);
+    if (filtered.length === 0) {
+      return NextResponse.json({ error: "Mindestens ein Abzugsposten erforderlich" }, { status: 400 });
+    }
+
+    hh.balanceDeductions = filtered;
     await hh.save();
 
     return NextResponse.json({ success: true });
