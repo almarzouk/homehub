@@ -67,6 +67,16 @@ export default function AdminUsersPage() {
 
   useEffect(() => { load(); }, [load]);
 
+  useEffect(() => {
+    if (!confirmDelete) return;
+    document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+    };
+  }, [confirmDelete]);
+
   const doAction = async (userId: string, action: string, value?: number) => {
     setActionLoading(userId + action);
     try {
@@ -393,10 +403,10 @@ export default function AdminUsersPage() {
         )}
       </div>
 
-      {/* Delete confirm modal */}
       {confirmDelete && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="w-full max-w-sm bg-gray-900 border border-gray-700 rounded-2xl p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="modal-scrollable flex flex-col overflow-hidden rounded-t-2xl sm:rounded-2xl w-full max-w-sm bg-gray-900 border border-gray-700 shadow-2xl">
+            <div className="modal-scroll-body p-6 space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-red-950 flex items-center justify-center">
                 <AlertTriangle className="h-5 w-5 text-red-400" />
@@ -422,6 +432,7 @@ export default function AdminUsersPage() {
               >
                 {t("common.delete")}
               </button>
+            </div>
             </div>
           </div>
         </div>

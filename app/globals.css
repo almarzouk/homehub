@@ -118,6 +118,63 @@ body {
 .dark ::-webkit-scrollbar-thumb { background: #475569; }
 .dark ::-webkit-scrollbar-thumb:hover { background: #64748b; }
 
+/* ─── Modal (mobile scroll fix) ─────────────────────────────────────────────── */
+body.modal-open {
+  overflow: hidden;
+}
+.modal-panel {
+  -webkit-overflow-scrolling: touch;
+}
+.modal-body {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+.safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+@keyframes modal-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-modal-slide-up {
+  animation: modal-slide-up 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+/* Legacy modals without Modal component — apply scroll fix via class */
+.modal-scrollable {
+  max-height: min(78dvh, calc(100dvh - 5.5rem));
+  margin-bottom: 4rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+@media (min-width: 640px) {
+  .modal-scrollable {
+    max-height: 88dvh;
+    margin-bottom: 0;
+  }
+}
+.modal-scrollable > .modal-scroll-body {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 /* ─── Page Transition ───────────────────────────────────────────────────────── */
 @keyframes page-enter {
   from {

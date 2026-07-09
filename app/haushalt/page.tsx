@@ -69,6 +69,16 @@ export default function HaushaltPage() {
 
   useEffect(() => { load(); }, [load]);
 
+  useEffect(() => {
+    if (!showForm) return;
+    document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+    };
+  }, [showForm]);
+
   const toggle = async (a: Aufgabe) => {
     await fetch(`/api/haushalt/${a._id}`, {
       method: "PATCH",
@@ -227,11 +237,13 @@ export default function HaushaltPage() {
         </div>
       )}
 
-      {/* Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-end md:items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t("haushalt.newTask")}</h2>
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-[80]">
+          <div className="modal-scrollable flex flex-col overflow-hidden rounded-t-2xl sm:rounded-2xl bg-white dark:bg-gray-900 w-full max-w-lg shadow-2xl">
+            <div className="flex-shrink-0 px-6 pt-6 pb-0">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t("haushalt.newTask")}</h2>
+            </div>
+            <div className="modal-scroll-body px-6 py-4">
             <form onSubmit={save} className="space-y-4">
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1">{t("haushalt.title")} *</label>
@@ -293,6 +305,7 @@ export default function HaushaltPage() {
                 </button>
               </div>
             </form>
+            </div>
           </div>
         </div>
       )}

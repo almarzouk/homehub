@@ -25,6 +25,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useHouseholdConfig } from "@/hooks/useHouseholdConfig";
+import { MEHR_MODULE_MAP } from "@/lib/nav-filter";
 
 interface MehrItem {
   href: string;
@@ -59,8 +61,11 @@ const MEHR_ITEMS: MehrItem[] = [
 
 export default function MehrPage() {
   const { t } = useTranslation();
-  // Filter out dokumente — hidden from users for now (code kept for future use)
-  const visibleItems = MEHR_ITEMS.filter((item) => item.href !== "/dokumente");
+  const { isModuleEnabled } = useHouseholdConfig();
+  const visibleItems = MEHR_ITEMS.filter((item) => {
+    const mod = MEHR_MODULE_MAP[item.href];
+    return mod ? isModuleEnabled(mod) : true;
+  });
   return (
     <div className="max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t("nav.items.mehr")}</h1>

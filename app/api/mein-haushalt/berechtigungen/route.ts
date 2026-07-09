@@ -3,6 +3,7 @@ import { getApiSession } from "@/lib/api-auth";
 import { connectDB } from "@/lib/db";
 import Household from "@/models/Household";
 import { isValidModuleKey, MODULE_REGISTRY } from "@/lib/modules";
+import { isValidFinanzSectionKey, FINANZ_SECTION_REGISTRY } from "@/lib/finanzen-sections";
 
 /**
  * GET /api/mein-haushalt/berechtigungen
@@ -36,6 +37,7 @@ export async function GET() {
   return NextResponse.json({
     memberPermissions: hh.memberPermissions ?? {},
     enabledModules: hh.enabledModules ?? [],
+    enabledFinanzSections: hh.enabledFinanzSections ?? [],
     coAdmins: (hh.coAdmins ?? []).map(String),
     ownerId: String(hh.ownerId),
   });
@@ -123,6 +125,22 @@ export async function PUT(req: NextRequest) {
     const allKeys = MODULE_REGISTRY.map((m) => m.key);
     const filtered = enabledModules.filter((k) => allKeys.includes(k as never));
     hh.enabledModules = filtered;
+    await hh.save();
+
+    return NextResponse.json({ success: true });
+  }
+
+  if (type === "finanzSections") {
+    const { enabledFinanzSections } = body as { enabledFinanzSections: string[] };
+    if (!Array.isArray(enabledFinanzSections)) {
+      return NextResponse.json({ error: "enabledFinanzSections muss ein Array sein" }, { status: 400 });
+    }
+
+    const allKeys = FINANZ_SECTION_REGISTRY.map((s) => s.key);
+    const filtered = enabledFinanzSections.filter((k) => allKeys.includes(k as never));
+    // Dashboard is always enabled
+    if (!filtered.includes("dashboard")) filtered.unshift("dashboard");
+    hh.enabledFinanzSections = filtered;
     await hh.save();
 
     return NextResponse.json({ success: true });

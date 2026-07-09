@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import {
   Home, Package, Wallet, ChevronLeft, Check, Loader2,
   Copy, CheckCircle2, Grid3x3, ChevronRight, X, Plus,
@@ -87,10 +88,34 @@ function StepBar({ current, total }: { current: number; total: number }) {
 
 export default function SetupPage() {
   const { update: updateSession } = useSession();
+  const router = useRouter();
 
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [checkingStatus, setCheckingStatus] = useState(true);
+
+  // If onboarding already done (or household already configured), skip this page
+  useEffect(() => {
+    async function checkStatus() {
+      try {
+        const res = await fetch("/api/setup/status");
+        const data = await res.json();
+        if (data.onboardingCompleted) {
+          router.replace("/dashboard");
+          return;
+        }
+        if (data.shouldSkipSetup) {
+          await fetch("/api/setup/complete", { method: "POST" });
+          await updateSession({});
+          router.replace("/dashboard");
+          return;
+        }
+      } catch { /* show setup wizard */ }
+      setCheckingStatus(false);
+    }
+    checkStatus();
+  }, [router, updateSession]);
 
   // Step 0: household
   const [householdName, setHouseholdName] = useState("");
@@ -232,6 +257,16 @@ export default function SetupPage() {
     window.location.href = "/dashboard";
   };
 
+  const skipToDashboard = async () => {
+    setSaving(true);
+    try {
+      await fetch("/api/setup/complete", { method: "POST" });
+      await updateSession({});
+      window.location.href = "/dashboard";
+    } catch { /* ignore */ }
+    setSaving(false);
+  };
+
   const copyInviteCode = () => {
     navigator.clipboard.writeText(inviteCode).catch(() => {});
     setCopied(true);
@@ -286,6 +321,14 @@ export default function SetupPage() {
   // ─── Render ───────────────────────────────────────────────────────────────
 
   const TOTAL_STEPS = 5; // 0=household, 1=modules, 2=inventory, 3=finance, 4=done
+
+  if (checkingStatus) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--background)" }}>
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -374,6 +417,15 @@ export default function SetupPage() {
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               Weiter
               {!saving && <ChevronRight className="h-4 w-4" />}
+            </button>
+            <button
+              type="button"
+              onClick={skipToDashboard}
+              disabled={saving}
+              className="w-full mt-3 py-2 text-sm transition-colors"
+              style={{ color: "var(--muted)" }}
+            >
+              Einrichtung überspringen → Dashboard
             </button>
           </div>
         )}

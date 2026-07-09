@@ -19,6 +19,8 @@ import LanguageToggle from "@/components/ui/LanguageToggle";
 import UserMenu from "./UserMenu";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useHouseholdConfig } from "@/hooks/useHouseholdConfig";
+import { getModuleForRoute, getFinanzSectionForRoute } from "@/lib/nav-routes";
 
 type NavItem = { href: string; labelKey: string; icon: React.ElementType; badge?: "alerts" | "notifications" };
 type NavSection = { id: string; labelKey: string; icon: React.ElementType; color: string; items: NavItem[] };
@@ -95,9 +97,23 @@ export default function MobileNav() {
   const notificationCount = useNotificationCount();
   const { t } = useTranslation();
   const { isRTL } = useLanguage();
+  const { isModuleEnabled, isFinanzSectionEnabled } = useHouseholdConfig();
   const [open, setOpen] = useState(false);
 
-  const activeSection = sections.find((s) =>
+  const filteredSections = sections
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => {
+        const mod = getModuleForRoute(item.href);
+        const finSec = getFinanzSectionForRoute(item.href);
+        if (mod && !isModuleEnabled(mod)) return false;
+        if (finSec && !isFinanzSectionEnabled(finSec)) return false;
+        return true;
+      }),
+    }))
+    .filter((section) => section.items.length > 0);
+
+  const activeSection = filteredSections.find((s) =>
     s.items.some((item) => pathname === item.href || pathname.startsWith(item.href + "/"))
   )?.id ?? null;
   const [openSection, setOpenSection] = useState<string | null>(activeSection);
@@ -107,11 +123,11 @@ export default function MobileNav() {
 
   // Auto-open section on navigation
   useEffect(() => {
-    const current = sections.find((s) =>
+    const current = filteredSections.find((s) =>
       s.items.some((item) => pathname === item.href || pathname.startsWith(item.href + "/"))
     )?.id ?? null;
     if (current) setOpenSection(current);
-  }, [pathname]);
+  }, [pathname, filteredSections]);
 
   const isActive = (href: string) =>
     href === "/kueche" || href === "/vorrat" ? pathname === href : pathname.startsWith(href);
@@ -205,7 +221,7 @@ export default function MobileNav() {
 
         {/* Sections */}
         <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto">
-          {sections.map((section) => {
+          {filteredSections.map((section) => {
             const SectionIcon = section.icon;
             const isThisOpen = openSection === section.id;
             return (

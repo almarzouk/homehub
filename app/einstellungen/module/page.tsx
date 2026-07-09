@@ -3,38 +3,44 @@
 import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
 import Link from "next/link";
-import { ArrowLeft, ToggleLeft, ToggleRight, Save,
-  LayoutDashboard, ChefHat, Package, Wallet, Sparkles, Pill, Gift,
-  FileText, Map, ArrowLeftRight, UserRound, Calendar } from "lucide-react";
+import {
+  ArrowLeft, ToggleLeft, ToggleRight, Save, Wallet,
+  LayoutDashboard, ChefHat, Package, Sparkles, Pill, Gift,
+  FileText, Map, ArrowLeftRight, UserRound, Calendar, Car, PawPrint,
+  Zap, MessageCircle, Dumbbell, Truck, Settings, Layers,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { MODULE_REGISTRY } from "@/lib/modules";
+import { invalidateHouseholdConfig } from "@/hooks/useHouseholdConfig";
 
-interface ModuleDef {
-  key: string;
-  label_de: string;
-  beschreibung_de: string;
-  Icon: LucideIcon;
-  color: string;
-  group: "tab" | "mehr";
-}
+const ICON_MAP: Record<string, LucideIcon> = {
+  uebersicht: LayoutDashboard,
+  kueche: ChefHat,
+  vorrat: Package,
+  finanzen: Wallet,
+  haushalt: Sparkles,
+  medikamente: Pill,
+  wunschliste: Gift,
+  dokumente: FileText,
+  einkaufsrouten: Map,
+  bewegungen: ArrowLeftRight,
+  familie: UserRound,
+  termine: Calendar,
+  kalender: Calendar,
+  reinigung: Sparkles,
+  fahrzeuge: Car,
+  haustiere: PawPrint,
+  energie: Zap,
+  chat: MessageCircle,
+  fitness: Dumbbell,
+  lieferungen: Truck,
+  einstellungen: Settings,
+};
 
-const MODULES: ModuleDef[] = [
-  { key: "uebersicht",     label_de: "Übersicht",       beschreibung_de: "Dashboard & Schnellzugriff",          Icon: LayoutDashboard, color: "#3B82F6", group: "tab"  },
-  { key: "kueche",         label_de: "Küche",           beschreibung_de: "Rezepte & Kochgeräte",                Icon: ChefHat,         color: "#F97316", group: "tab"  },
-  { key: "vorrat",         label_de: "Vorrat",          beschreibung_de: "Lagerbestand verwalten",              Icon: Package,         color: "#10B981", group: "tab"  },
-  { key: "finanzen",       label_de: "Finanzen",        beschreibung_de: "Ausgaben, Investitionen & Sparpläne", Icon: Wallet,          color: "#8B5CF6", group: "tab"  },
-  { key: "haushalt",       label_de: "Haushalt",        beschreibung_de: "Aufgaben, Reinigung, Wartung",        Icon: Sparkles,        color: "#06B6D4", group: "mehr" },
-  { key: "medikamente",    label_de: "Medikamente",     beschreibung_de: "Vorrat, Dosierungen, Ablaufdaten",    Icon: Pill,            color: "#EF4444", group: "mehr" },
-  { key: "wunschliste",    label_de: "Wunschliste",     beschreibung_de: "Kaufziele & Wünsche",                 Icon: Gift,            color: "#8B5CF6", group: "mehr" },
-  { key: "dokumente",      label_de: "Dokumente",       beschreibung_de: "Verträge, Ausweise, Garantien",       Icon: FileText,        color: "#3B82F6", group: "mehr" },
-  { key: "einkaufsrouten", label_de: "Einkaufsrouten", beschreibung_de: "Einkaufsliste nach Gängen sortieren",  Icon: Map,             color: "#10B981", group: "mehr" },
-  { key: "bewegungen",     label_de: "Lagerbewegungen", beschreibung_de: "Eingang · Ausgang · Bestandsanpassung", Icon: ArrowLeftRight, color: "#3B82F6", group: "mehr" },
-  { key: "familie",        label_de: "Familie",         beschreibung_de: "Mitglieder & Push-Nachrichten",       Icon: UserRound,       color: "#EC4899", group: "mehr" },
-  { key: "termine",        label_de: "Termine",         beschreibung_de: "Arzt, Schule, Freizeit & mehr",       Icon: Calendar,        color: "#F59E0B", group: "mehr" },
-];
-
-const ALL_KEYS = MODULES.map((m) => m.key);
+const ALL_KEYS = MODULE_REGISTRY.map((m) => m.key);
 
 export default function ModuleSettingsPage() {
+  const { t } = useTranslation();
   const [enabled, setEnabled] = useState<Set<string>>(new Set(ALL_KEYS));
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -48,11 +54,11 @@ export default function ModuleSettingsPage() {
       const mods: string[] = res.enabledModules ?? [];
       setEnabled(mods.length > 0 ? new Set(mods) : new Set(ALL_KEYS));
     } catch {
-      setError("Ladefehler");
+      setError(t("common.error"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -60,7 +66,6 @@ export default function ModuleSettingsPage() {
     setEnabled((prev) => {
       const next = new Set(prev);
       if (next.has(key)) {
-        // Protect core modules from being disabled
         if (key === "uebersicht") return prev;
         next.delete(key);
       } else {
@@ -81,6 +86,7 @@ export default function ModuleSettingsPage() {
         body: JSON.stringify({ type: "modules", enabledModules: Array.from(enabled) }),
       });
       if (!res.ok) throw new Error((await res.json()).error);
+      invalidateHouseholdConfig();
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (e) {
@@ -90,8 +96,8 @@ export default function ModuleSettingsPage() {
     }
   };
 
-  const tabs = MODULES.filter((m) => m.group === "tab");
-  const mehr = MODULES.filter((m) => m.group === "mehr");
+  const tabs = MODULE_REGISTRY.filter((m) => m.group === "tab");
+  const mehr = MODULE_REGISTRY.filter((m) => m.group === "mehr");
 
   if (loading) {
     return (
@@ -108,8 +114,8 @@ export default function ModuleSettingsPage() {
           <ArrowLeft className="h-5 w-5 text-gray-600 dark:text-gray-400" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">App-Bereiche verwalten</h1>
-          <p className="text-sm text-gray-500">Schalte Bereiche für deinen gesamten Haushalt ein oder aus</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("einstellungen.moduleSettings")}</h1>
+          <p className="text-sm text-gray-500">{t("einstellungen.moduleSettingsDesc")}</p>
         </div>
       </div>
 
@@ -118,24 +124,40 @@ export default function ModuleSettingsPage() {
       )}
 
       <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-xl px-4 py-3 text-sm text-blue-700 dark:text-blue-400">
-        Deaktivierte Bereiche sind für <strong>alle Haushaltsmitglieder</strong> ausgeblendet — auch für Co-Admins. Die App aktualisiert sich automatisch innerhalb von 60 Sekunden.
+        {t("einstellungen.moduleSettingsHint")}
       </div>
 
-      {[{ title: "Haupt-Tabs", desc: "Diese Bereiche erscheinen direkt in der unteren Navigationsleiste", items: tabs },
-        { title: "Mehr-Bereiche", desc: "Diese Bereiche erscheinen unter dem \"Mehr\"-Tab", items: mehr }].map(({ title, desc, items }) => (
+      {/* Finance sub-sections link */}
+      {enabled.has("finanzen") && (
+        <Link href="/einstellungen/finanzen"
+          className="flex items-center gap-4 p-4 bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 rounded-2xl hover:bg-emerald-100 dark:hover:bg-emerald-900 transition-colors">
+          <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center">
+            <Wallet className="h-5 w-5 text-emerald-600" />
+          </div>
+          <div className="flex-1">
+            <p className="font-medium text-emerald-800 dark:text-emerald-300">{t("finanzen.sectionSettings")}</p>
+            <p className="text-xs text-emerald-600 dark:text-emerald-400">{t("finanzen.sectionSettingsDesc")}</p>
+          </div>
+          <Layers className="h-5 w-5 text-emerald-500" />
+        </Link>
+      )}
+
+      {[{ title: t("einstellungen.mainTabs"), desc: t("einstellungen.mainTabsDesc"), items: tabs },
+        { title: t("einstellungen.moreSections"), desc: t("einstellungen.moreSectionsDesc"), items: mehr }].map(({ title, desc, items }) => (
         <div key={title} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
             <h2 className="font-semibold text-gray-900 dark:text-white">{title}</h2>
             <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
           </div>
           {items.map((m) => {
+            const Icon = ICON_MAP[m.key] ?? Layers;
             const isEnabled = enabled.has(m.key);
             const isCore = m.key === "uebersicht";
             return (
               <div key={m.key} className="flex items-center gap-4 px-4 py-3.5 border-b border-gray-50 dark:border-gray-800 last:border-0">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center"
                   style={{ backgroundColor: isEnabled ? `${m.color}20` : "#f3f4f6" }}>
-                  <m.Icon className="h-5 w-5" style={{ color: isEnabled ? m.color : "#9ca3af" }} />
+                  <Icon className="h-5 w-5" style={{ color: isEnabled ? m.color : "#9ca3af" }} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
@@ -143,7 +165,7 @@ export default function ModuleSettingsPage() {
                       {m.label_de}
                     </span>
                     {isCore && (
-                      <span className="text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-400">Immer aktiv</span>
+                      <span className="text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-400">{t("finanzen.alwaysActive")}</span>
                     )}
                   </div>
                   <p className={`text-xs ${isEnabled ? "text-gray-400" : "text-gray-300 dark:text-gray-700"}`}>{m.beschreibung_de}</p>
@@ -171,11 +193,11 @@ export default function ModuleSettingsPage() {
         className="w-full py-3 bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white rounded-2xl font-semibold transition-colors flex items-center justify-center gap-2"
       >
         {saving ? (
-          <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Wird gespeichert…</>
+          <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> {t("finanzen.saving")}</>
         ) : saved ? (
-          <><Save className="h-4 w-4" /> Änderungen gespeichert!</>
+          <><Save className="h-4 w-4" /> {t("common.success")}</>
         ) : (
-          <><Save className="h-4 w-4" /> Änderungen speichern</>
+          <><Save className="h-4 w-4" /> {t("common.save")}</>
         )}
       </button>
     </div>

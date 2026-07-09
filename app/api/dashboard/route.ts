@@ -99,6 +99,16 @@ export async function GET(request: NextRequest) {
     currency: salary?.currency ?? "EUR",
     recentExpenses,
     unreadAlerts,
+    savingsGoals: savingsGoals.map((g) => ({
+      _id: g._id,
+      name: g.name,
+      emoji: g.emoji,
+      color: g.color,
+      targetAmount: g.targetAmount,
+      currentAmount: g.currentBalance,
+      deadline: g.deadline,
+      deposits: g.deposits ?? [],
+    })),
     // Vorrat
     vorrat: {
       total,

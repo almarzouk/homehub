@@ -69,6 +69,16 @@ export default function FamiliePage() {
 
   useEffect(() => { load(); }, []);
 
+  useEffect(() => {
+    if (!showForm) return;
+    document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+    };
+  }, [showForm]);
+
   const openAdd = () => {
     setEditMember(null);
     setName(""); setEmail(""); setPassword(""); setRole("user");
@@ -244,12 +254,11 @@ export default function FamiliePage() {
         </div>
       )}
 
-      {/* Modal */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeForm} />
-          <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md border border-gray-100 dark:border-gray-800">
-            <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-100 dark:border-gray-800">
+          <div className="relative modal-scrollable flex flex-col overflow-hidden rounded-t-2xl sm:rounded-2xl bg-white dark:bg-gray-900 shadow-2xl w-full max-w-md border border-gray-100 dark:border-gray-800">
+            <div className="flex-shrink-0 flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-100 dark:border-gray-800">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-xl bg-pink-100 dark:bg-pink-950 flex items-center justify-center">
                   {editMember ? <Pencil className="h-4 w-4 text-pink-600" /> : <UserPlus className="h-4 w-4 text-pink-600" />}
@@ -263,7 +272,8 @@ export default function FamiliePage() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+            <div className="modal-scroll-body px-6 py-5">
+            <form onSubmit={handleSubmit} className="space-y-4">
               {formError && (
                 <div className="flex items-center gap-2 bg-red-50 dark:bg-red-950 border border-red-100 dark:border-red-900 text-red-600 px-3 py-2.5 rounded-xl text-sm">
                   <AlertCircle className="h-4 w-4 flex-shrink-0" />
@@ -365,6 +375,7 @@ export default function FamiliePage() {
                 </button>
               </div>
             </form>
+            </div>
           </div>
         </div>
       )}

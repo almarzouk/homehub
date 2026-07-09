@@ -69,6 +69,16 @@ export default function HaushaltskassePage() {
 
   useEffect(() => { load(); }, [load]);
 
+  useEffect(() => {
+    if (!showForm) return;
+    document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+    };
+  }, [showForm]);
+
   const openNew = () => {
     setEditId(null);
     setForm({ ...emptyForm, datum: new Date().toISOString().slice(0, 10) });
@@ -232,11 +242,10 @@ export default function HaushaltskassePage() {
         </div>
       )}
 
-      {/* Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/40 dark:bg-black/60 z-50 flex items-end sm:items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md shadow-xl">
-            <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800">
+        <div className="fixed inset-0 bg-black/40 dark:bg-black/60 z-[80] flex items-end sm:items-center justify-center">
+          <div className="modal-scrollable flex flex-col overflow-hidden rounded-t-2xl sm:rounded-2xl bg-white dark:bg-gray-900 w-full max-w-md shadow-xl">
+            <div className="flex-shrink-0 flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800">
               <h2 className="font-semibold text-gray-900 dark:text-white">
                 {editId ? t("haushaltskasse.editEntry") : t("haushaltskasse.addEntry")}
               </h2>
@@ -244,7 +253,7 @@ export default function HaushaltskassePage() {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div className="p-5 space-y-4">
+            <div className="modal-scroll-body p-5 space-y-4">
               <div className="flex gap-3">
                 <div className="flex-1">
                   <label className="text-xs font-medium text-gray-500 mb-1 block">{t("haushaltskasse.amount")} (€) *</label>
@@ -285,7 +294,7 @@ export default function HaushaltskassePage() {
                   className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white" />
               </div>
             </div>
-            <div className="flex gap-3 p-5 pt-0">
+            <div className="flex-shrink-0 safe-bottom flex gap-3 p-5 pt-0 border-t border-gray-100 dark:border-gray-800">
               <button onClick={() => setShowForm(false)}
                 className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                 {t("common.cancel")}

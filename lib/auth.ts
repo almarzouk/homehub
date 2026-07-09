@@ -19,13 +19,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.householdId = (user as { householdId?: string }).householdId;
         token.onboardingCompleted = (user as { onboardingCompleted?: boolean }).onboardingCompleted;
       }
-      // Re-fetch dynamic fields from DB: on update trigger (after setup completion)
-      // or when householdId is missing in a stale JWT
-      const needsRefresh = trigger === "update" || (token.id && !token.householdId && trigger !== "signIn");
-      if (token.id && needsRefresh) {
+      // Always refresh onboardingCompleted from DB (JWT can be stale after setup)
+      if (token.id) {
         try {
           await connectDB();
-          const dbUser = await User.findById(token.id).lean() as { householdId?: unknown; onboardingCompleted?: boolean } | null;
+          const dbUser = await User.findById(token.id).lean() as {
+            householdId?: unknown;
+            onboardingCompleted?: boolean;
+          } | null;
           if (dbUser?.householdId) {
             token.householdId = String(dbUser.householdId);
           }

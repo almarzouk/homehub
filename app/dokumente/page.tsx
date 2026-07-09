@@ -53,6 +53,16 @@ export default function DokumentePage() {
 
   useEffect(() => { load(); }, [load]);
 
+  useEffect(() => {
+    if (!showForm && !viewer) return;
+    document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+    };
+  }, [showForm, viewer]);
+
   const del = async (id: string) => {
     if (!confirm("Dokument löschen?")) return;
     await fetch(`/api/dokumente/${id}`, { method: "DELETE" });
@@ -183,11 +193,10 @@ export default function DokumentePage() {
         </div>
       )}
 
-      {/* Document Viewer Modal */}
       {viewer && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800">
+        <div className="fixed inset-0 bg-black/80 flex items-end sm:items-center justify-center z-[80]">
+          <div className="modal-scrollable flex flex-col overflow-hidden rounded-t-2xl sm:rounded-2xl bg-white dark:bg-gray-900 w-full max-w-2xl shadow-2xl">
+            <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800">
               <div>
                 <h3 className="font-bold text-gray-900 dark:text-white">{viewer.titel}</h3>
                 <div className="flex items-center gap-2 mt-1">
@@ -212,7 +221,7 @@ export default function DokumentePage() {
                 </button>
               </div>
             </div>
-            <div className="overflow-y-auto flex-1">
+            <div className="modal-scroll-body flex-1">
               <img src={viewer.bild} alt={viewer.titel} className="w-full object-contain" />
               {viewer.beschreibung && (
                 <p className="p-4 text-sm text-gray-500">{viewer.beschreibung}</p>
@@ -222,11 +231,13 @@ export default function DokumentePage() {
         </div>
       )}
 
-      {/* Upload Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-end md:items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Neues Dokument</h2>
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-[80]">
+          <div className="modal-scrollable flex flex-col overflow-hidden rounded-t-2xl sm:rounded-2xl bg-white dark:bg-gray-900 w-full max-w-lg shadow-2xl">
+            <div className="flex-shrink-0 px-6 pt-6 pb-0">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Neues Dokument</h2>
+            </div>
+            <div className="modal-scroll-body px-6 py-4">
             <form onSubmit={save} className="space-y-4">
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1">Titel *</label>
@@ -274,6 +285,7 @@ export default function DokumentePage() {
                 </button>
               </div>
             </form>
+            </div>
           </div>
         </div>
       )}

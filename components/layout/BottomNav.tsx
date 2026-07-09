@@ -10,17 +10,22 @@ import {
   LayoutGrid,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useHouseholdConfig } from "@/hooks/useHouseholdConfig";
+import type { ModuleKey } from "@/lib/modules";
 
-const tabs = [
-  { href: "/", icon: LayoutDashboard, label: "Home", exact: true },
-  { href: "/kueche", icon: ChefHat, label: "Küche" },
-  { href: "/vorrat", icon: Package, label: "Vorrat" },
-  { href: "/finanzen/dashboard", icon: Wallet, label: "Finanzen" },
-  { href: "/mehr", icon: LayoutGrid, label: "Mehr" },
+const ALL_TABS: { href: string; icon: React.ElementType; label: string; exact?: boolean; moduleKey: ModuleKey }[] = [
+  { href: "/", icon: LayoutDashboard, label: "Home", exact: true, moduleKey: "uebersicht" },
+  { href: "/kueche", icon: ChefHat, label: "Küche", moduleKey: "kueche" },
+  { href: "/vorrat", icon: Package, label: "Vorrat", moduleKey: "vorrat" },
+  { href: "/finanzen/dashboard", icon: Wallet, label: "Finanzen", moduleKey: "finanzen" },
+  { href: "/mehr", icon: LayoutGrid, label: "Mehr", moduleKey: "uebersicht" },
 ];
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const { isModuleEnabled } = useHouseholdConfig();
+
+  const tabs = ALL_TABS.filter((tab) => isModuleEnabled(tab.moduleKey));
 
   return (
     <nav className="md:hidden fixed bottom-0 inset-x-0 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 z-40">

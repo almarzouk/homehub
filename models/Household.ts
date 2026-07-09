@@ -13,6 +13,8 @@ export interface IHouseholdDocument extends Document {
   coAdmins: Types.ObjectId[];
   /** Keys of modules that are active for this household (empty = all active) */
   enabledModules: string[];
+  /** Finance sub-sections that are active (empty = all active) */
+  enabledFinanzSections: string[];
   /**
    * Per-member permission overrides.
    * Shape: { [userId: string]: { [moduleKey: string]: { view: boolean; edit: boolean } } }
@@ -41,6 +43,7 @@ const HouseholdSchema = new Schema<IHouseholdDocument>(
     members: [{ type: Schema.Types.ObjectId, ref: "User" }],
     coAdmins: [{ type: Schema.Types.ObjectId, ref: "User" }],
     enabledModules: { type: [String], default: [] },
+    enabledFinanzSections: { type: [String], default: [] },
     memberPermissions: { type: Schema.Types.Mixed, default: {} },
   },
   { timestamps: true }

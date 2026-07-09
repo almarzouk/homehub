@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
-import { Plus, Trash2, Pencil, X, Lock } from "lucide-react";
+import { Plus, Trash2, Pencil, Lock } from "lucide-react";
+import Modal from "@/components/ui/Modal";
 import { formatCurrency, toCents, fromCents } from "@/lib/utils";
 
 interface Fixkosten {
@@ -205,17 +206,24 @@ export default function FixkostenPage() {
         </div>
       )}
 
-      {/* Modal */}
-      {modal.open && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={closeModal}>
-          <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800">
-              <h2 className="font-semibold text-gray-900 dark:text-white">{modal.editing ? t("finanzen.fixkosten") : t("finanzen.newFixkosten")}</h2>
-              <button onClick={closeModal} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl">
-                <X className="h-4 w-4 text-gray-500" />
-              </button>
-            </div>
-            <form onSubmit={handleSubmit} className="p-5 space-y-4">
+      <Modal
+        open={modal.open}
+        onClose={closeModal}
+        title={modal.editing ? t("finanzen.fixkosten") : t("finanzen.newFixkosten")}
+        footer={
+          <div className="flex gap-2">
+            <button type="button" onClick={closeModal}
+              className="flex-1 py-2.5 text-sm text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+              {t("common.cancel")}
+            </button>
+            <button type="submit" form="fixkosten-form" disabled={saving}
+              className="flex-1 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white text-sm rounded-xl disabled:opacity-50 transition-colors font-medium">
+              {saving ? t("finanzen.saving") : t("common.save")}
+            </button>
+          </div>
+        }
+      >
+            <form id="fixkosten-form" onSubmit={handleSubmit} className="space-y-4">
               {/* Preset chips */}
               {!modal.editing && (
                 <div>
@@ -259,20 +267,8 @@ export default function FixkostenPage() {
                   ))}
                 </select>
               </div>
-              <div className="flex gap-2 pt-1">
-                <button type="button" onClick={closeModal}
-                  className="flex-1 py-2.5 text-sm text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                  {t("common.cancel")}
-                </button>
-                <button type="submit" disabled={saving}
-                  className="flex-1 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white text-sm rounded-xl disabled:opacity-50 transition-colors font-medium">
-                  {saving ? t("finanzen.saving") : t("common.save")}
-                </button>
-              </div>
             </form>
-          </div>
-        </div>
-      )}
+      </Modal>
     </div>
   );
 }

@@ -9,6 +9,8 @@ export interface IUserDocument extends Document {
   isApproved: boolean;
   householdId?: Types.ObjectId;
   onboardingCompleted: boolean;
+  /** User dismissed the finance setup wizard without entering data */
+  finanzenSetupSkipped: boolean;
   aiMonthlyLimit: number;
   aiRequestsThisMonth: number;
   aiRequestsMonth: string;
@@ -26,6 +28,7 @@ const UserSchema = new Schema<IUserDocument>(
     isApproved: { type: Boolean, default: true },
     householdId: { type: Schema.Types.ObjectId, ref: "Household", index: true },
     onboardingCompleted: { type: Boolean, default: true },
+    finanzenSetupSkipped: { type: Boolean, default: false },
     // AI usage tracking
     aiMonthlyLimit: { type: Number, default: 10 },
     aiRequestsThisMonth: { type: Number, default: 0 },

@@ -1,0 +1,142 @@
+"use client";
+
+import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
+import Link from "next/link";
+import { ArrowLeft, ToggleLeft, ToggleRight, Save, Wallet } from "lucide-react";
+import { FINANZ_SECTION_REGISTRY } from "@/lib/finanzen-sections";
+import { invalidateHouseholdConfig } from "@/hooks/useHouseholdConfig";
+
+const ALL_SECTION_KEYS = FINANZ_SECTION_REGISTRY.map((s) => s.key);
+
+export default function FinanzSettingsPage() {
+  const { t } = useTranslation();
+  const [enabled, setEnabled] = useState<Set<string>>(new Set(ALL_SECTION_KEYS));
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/mein-haushalt/berechtigungen").then((r) => r.json());
+      const sections: string[] = res.enabledFinanzSections ?? [];
+      setEnabled(sections.length > 0 ? new Set(sections) : new Set(ALL_SECTION_KEYS));
+    } catch {
+      setError(t("common.error"));
+    } finally {
+      setLoading(false);
+    }
+  }, [t]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const toggle = (key: string) => {
+    if (key === "dashboard") return;
+    setEnabled((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      next.add("dashboard");
+      return next;
+    });
+    setSaved(false);
+  };
+
+  const save = async () => {
+    setSaving(true);
+    setError("");
+    try {
+      const res = await fetch("/api/mein-haushalt/berechtigungen", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "finanzSections", enabledFinanzSections: Array.from(enabled) }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error);
+      invalidateHouseholdConfig();
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-2xl mx-auto space-y-6">
+      <div className="flex items-center gap-3">
+        <Link href="/einstellungen" className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <ArrowLeft className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+        </Link>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("finanzen.sectionSettings")}</h1>
+          <p className="text-sm text-gray-500">{t("finanzen.sectionSettingsDesc")}</p>
+        </div>
+      </div>
+
+      {error && (
+        <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3 text-sm text-red-700 dark:text-red-400">{error}</div>
+      )}
+
+      <div className="bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 rounded-xl px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400">
+        {t("finanzen.sectionSettingsHint")}
+      </div>
+
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
+        {FINANZ_SECTION_REGISTRY.map((section) => {
+          const isEnabled = enabled.has(section.key);
+          const isCore = section.key === "dashboard";
+          return (
+            <div key={section.key} className="flex items-center gap-4 px-4 py-3.5 border-b border-gray-50 dark:border-gray-800 last:border-0">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isEnabled ? "bg-emerald-50 dark:bg-emerald-950" : "bg-gray-100 dark:bg-gray-800"}`}>
+                <Wallet className={`h-5 w-5 ${isEnabled ? "text-emerald-600" : "text-gray-400"}`} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className={`text-sm font-medium ${isEnabled ? "text-gray-900 dark:text-white" : "text-gray-400"}`}>
+                    {section.label_de}
+                  </span>
+                  {isCore && (
+                    <span className="text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-400">{t("finanzen.alwaysActive")}</span>
+                  )}
+                </div>
+                <p className={`text-xs ${isEnabled ? "text-gray-400" : "text-gray-300"}`}>{section.beschreibung_de}</p>
+              </div>
+              <button onClick={() => toggle(section.key)} disabled={isCore} className="transition-colors disabled:opacity-40">
+                {isEnabled ? (
+                  <ToggleRight className="h-7 w-7 text-emerald-500" />
+                ) : (
+                  <ToggleLeft className="h-7 w-7 text-gray-300 dark:text-gray-700" />
+                )}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+
+      <button
+        onClick={save}
+        disabled={saving}
+        className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-60 text-white rounded-2xl font-semibold transition-colors flex items-center justify-center gap-2"
+      >
+        {saving ? (
+          <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> {t("finanzen.saving")}</>
+        ) : saved ? (
+          <><Save className="h-4 w-4" /> {t("common.success")}</>
+        ) : (
+          <><Save className="h-4 w-4" /> {t("common.save")}</>
+        )}
+      </button>
+    </div>
+  );
+}
