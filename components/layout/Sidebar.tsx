@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   LayoutDashboard,
   ChefHat,
@@ -158,33 +158,37 @@ export default function Sidebar() {
   const { isModuleEnabled, isFinanzSectionEnabled } = useHouseholdConfig();
   const isAdmin = (session?.user as { role?: string })?.role === "admin";
 
-  const filteredSections = sections
-    .map((section) => ({
-      ...section,
-      items: section.items.filter((item) => {
-        const mod = getModuleForRoute(item.href);
-        const finSec = getFinanzSectionForRoute(item.href);
-        if (mod && !isModuleEnabled(mod)) return false;
-        if (finSec && !isFinanzSectionEnabled(finSec)) return false;
-        return true;
-      }),
-    }))
-    .filter((section) => section.items.length > 0);
+  const filteredSections = useMemo(
+    () =>
+      sections
+        .map((section) => ({
+          ...section,
+          items: section.items.filter((item) => {
+            const mod = getModuleForRoute(item.href);
+            const finSec = getFinanzSectionForRoute(item.href);
+            if (mod && !isModuleEnabled(mod)) return false;
+            if (finSec && !isFinanzSectionEnabled(finSec)) return false;
+            return true;
+          }),
+        }))
+        .filter((section) => section.items.length > 0),
+    [isModuleEnabled, isFinanzSectionEnabled]
+  );
 
-  // Determine which section contains the current route
-  const activeSection = filteredSections.find((s) =>
-    s.items.some((item) => pathname === item.href || pathname.startsWith(item.href + "/"))
-  )?.id ?? null;
+  const getSectionForPath = useCallback(
+    (path: string) =>
+      filteredSections.find((s) =>
+        s.items.some((item) => path === item.href || path.startsWith(item.href + "/"))
+      )?.id ?? null,
+    [filteredSections]
+  );
 
-  const [openSection, setOpenSection] = useState<string | null>(activeSection);
+  const [openSection, setOpenSection] = useState<string | null>(() => getSectionForPath(pathname));
 
-  // Auto-open section on navigation
+  // Open only the section for the current route; close all others on navigation
   useEffect(() => {
-    const current = filteredSections.find((s) =>
-      s.items.some((item) => pathname === item.href || pathname.startsWith(item.href + "/"))
-    )?.id ?? null;
-    if (current) setOpenSection(current);
-  }, [pathname, filteredSections]);
+    setOpenSection(getSectionForPath(pathname));
+  }, [pathname, getSectionForPath]);
 
   const toggleSection = (id: string) => {
     setOpenSection((prev) => (prev === id ? null : id));
@@ -254,7 +258,7 @@ export default function Sidebar() {
               </button>
 
               {/* Animated collapsible section */}
-              <div className="sidebar-section-items" data-open={isOpen}>
+              <div className="sidebar-section-items" data-open={isOpen ? "true" : "false"}>
                 <ul className="mt-0.5 space-y-0.5 ps-2">
                   {section.items.map(({ href, labelKey, icon: Icon, badge }) => {
                     const active = isActive(href);

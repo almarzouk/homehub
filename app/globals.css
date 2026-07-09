@@ -284,13 +284,20 @@ body.modal-open {
 /* ─── Sidebar section expand ───────────────────────────────────────────────── */
 .sidebar-section-items {
   overflow: hidden;
-  transition: max-height var(--transition-normal), opacity var(--transition-fast);
   max-height: 0;
   opacity: 0;
+  pointer-events: none;
 }
 .sidebar-section-items[data-open="true"] {
   max-height: 500px;
   opacity: 1;
+  pointer-events: auto;
+  transition: max-height var(--transition-normal), opacity var(--transition-fast);
+}
+.sidebar-section-items[data-open="false"] {
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* ─── Pulse dot for badges ──────────────────────────────────────────────────── */
