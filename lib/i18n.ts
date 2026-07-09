@@ -314,7 +314,7 @@ const de = {
     sectionSettings: "Finanz-Bereiche",
     sectionSettingsDesc: "Schalte einzelne Finanz-Seiten ein oder aus",
     sectionSettingsHint: "Deaktivierte Bereiche verschwinden aus der Navigation. Sparboxen und Übersicht bleiben immer verfügbar.",
-    balanceCalcTitle: "Berechnung „Verbleibend"",
+    balanceCalcTitle: "Berechnung Verbleibend",
     balanceCalcDesc: "Wähle, welche Posten vom Gehalt abgezogen werden",
     balanceCalcHint: "Standard: nur Ausgaben + Fixkosten. Investitionen und Sparbox-Einzahlungen kannst du optional hinzufügen.",
     savingsDeposits: "Sparbox-Einzahlungen",
