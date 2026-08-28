@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   Menu, X, Home, LayoutDashboard, ChefHat, Package, Wallet, LayoutGrid,
   UtensilsCrossed, BarChart3, Settings, ScanLine, Bell, ShoppingCart,
-  ArrowLeftRight, ClipboardList, Pill, Gift, FileText, Calendar, Sparkles,
+  ArrowLeftRight, ClipboardList, Pill, Gift, FileText, FilePenLine, Calendar, Sparkles,
   Truck, Receipt, TrendingUp, PiggyBank, CalendarClock, FileBarChart,
   Users, MessageCircle, Activity, Car, PawPrint, ChevronDown, ChevronRight, Plane,
   Baby, Banknote, Lock,
@@ -51,6 +51,7 @@ const sections: NavSection[] = [
       { href: "/medikamente", labelKey: "nav.items.medikamente", icon: Pill },
       { href: "/wunschliste", labelKey: "nav.items.wunschliste", icon: Gift },
       { href: "/dokumente", labelKey: "nav.items.dokumente", icon: FileText },
+      { href: "/docs", labelKey: "nav.items.docs", icon: FilePenLine },
       { href: "/kalender", labelKey: "nav.items.kalender", icon: Calendar },
       { href: "/reinigung", labelKey: "nav.items.reinigung", icon: Sparkles },
       { href: "/reisecheckliste", labelKey: "nav.items.reisecheckliste", icon: Plane },

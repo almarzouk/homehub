@@ -6,7 +6,7 @@ import Link from "next/link";
 import {
   ArrowLeft, ToggleLeft, ToggleRight, Save, Wallet,
   LayoutDashboard, ChefHat, Package, Sparkles, Pill, Gift,
-  FileText, Map, ArrowLeftRight, UserRound, Calendar, Car, PawPrint,
+  FileText, Map, FilePenLine, ArrowLeftRight, UserRound, Calendar, Car, PawPrint,
   Zap, MessageCircle, Dumbbell, Truck, Settings, Layers,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -22,6 +22,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   medikamente: Pill,
   wunschliste: Gift,
   dokumente: FileText,
+  docs: FilePenLine,
   einkaufsrouten: Map,
   bewegungen: ArrowLeftRight,
   familie: UserRound,

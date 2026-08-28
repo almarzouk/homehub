@@ -27,6 +27,7 @@ export const MEHR_MODULE_MAP: Record<string, ModuleKey> = {
   "/medikamente": "medikamente",
   "/wunschliste": "wunschliste",
   "/dokumente": "dokumente",
+  "/docs": "docs",
   "/einkaufsliste": "einkaufsrouten",
   "/bewegungen": "bewegungen",
   "/familie": "familie",

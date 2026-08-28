@@ -10,6 +10,7 @@ export type ModuleKey =
   | "medikamente"
   | "wunschliste"
   | "dokumente"
+  | "docs"
   | "einkaufsrouten"
   | "bewegungen"
   | "familie"
@@ -120,6 +121,17 @@ export const MODULE_REGISTRY: ModuleDefinition[] = [
     beschreibung_de: "Verträge, Ausweise, Garantien",
     icon: "documents-outline",
     color: "#3B82F6",
+    group: "mehr",
+    defaultEnabled: true,
+    defaultViewForMembers: true,
+    defaultEditForMembers: true,
+  },
+  {
+    key: "docs",
+    label_de: "Docs",
+    beschreibung_de: "Gemeinsame Textnotizen & Tabellen",
+    icon: "document-text-outline",
+    color: "#7C3AED",
     group: "mehr",
     defaultEnabled: true,
     defaultViewForMembers: true,
@@ -288,6 +300,7 @@ export const DEFAULT_MEHR: ModuleKey[] = [
   "medikamente",
   "wunschliste",
   "dokumente",
+  "docs",
   "einkaufsrouten",
   "bewegungen",
   "familie",

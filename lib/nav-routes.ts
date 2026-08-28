@@ -38,6 +38,7 @@ export const ROUTE_MODULE_MAP: RouteModuleMapping[] = [
   { href: "/medikamente", moduleKey: "medikamente" },
   { href: "/wunschliste", moduleKey: "wunschliste" },
   { href: "/dokumente", moduleKey: "dokumente" },
+  { href: "/docs", moduleKey: "docs" },
   { href: "/kalender", moduleKey: "kalender" },
   { href: "/reinigung", moduleKey: "reinigung" },
   { href: "/reisecheckliste", moduleKey: "haushalt" },

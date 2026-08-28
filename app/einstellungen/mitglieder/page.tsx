@@ -5,7 +5,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 import Link from "next/link";
 import {
   ArrowLeft, Shield, ShieldCheck, ShieldOff, Users, Eye, EyeOff, Pencil, Lock, Crown, RotateCcw,
-  LayoutDashboard, ChefHat, Package, Wallet, Sparkles, Pill, Gift, FileText, Map, ArrowLeftRight, UserRound, Calendar,
+  LayoutDashboard, ChefHat, Package, Wallet, Sparkles, Pill, Gift, FileText, FilePenLine, Map, ArrowLeftRight, UserRound, Calendar,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -43,6 +43,7 @@ const MODULES: ModuleDef[] = [
   { key: "medikamente",    label_de: "Medikamente",     beschreibung_de: "Vorrat & Dosierungen",            Icon: Pill,            color: "#EF4444", group: "mehr", defaultViewForMembers: true,  defaultEditForMembers: true  },
   { key: "wunschliste",    label_de: "Wunschliste",     beschreibung_de: "Kaufziele & Wünsche",             Icon: Gift,            color: "#8B5CF6", group: "mehr", defaultViewForMembers: true,  defaultEditForMembers: true  },
   { key: "dokumente",      label_de: "Dokumente",       beschreibung_de: "Verträge & Ausweise",             Icon: FileText,        color: "#3B82F6", group: "mehr", defaultViewForMembers: true,  defaultEditForMembers: true  },
+  { key: "docs",           label_de: "Docs",            beschreibung_de: "Gemeinsame Textnotizen",          Icon: FilePenLine,   color: "#7C3AED", group: "mehr", defaultViewForMembers: true,  defaultEditForMembers: true  },
   { key: "einkaufsrouten", label_de: "Einkaufsrouten", beschreibung_de: "Gänge & Routen",                  Icon: Map,             color: "#10B981", group: "mehr", defaultViewForMembers: true,  defaultEditForMembers: true  },
   { key: "bewegungen",     label_de: "Lagerbewegungen", beschreibung_de: "Ein- & Ausgänge",                Icon: ArrowLeftRight,  color: "#3B82F6", group: "mehr", defaultViewForMembers: true,  defaultEditForMembers: false },
   { key: "familie",        label_de: "Familie",         beschreibung_de: "Mitglieder & Benachrichtigungen", Icon: UserRound,       color: "#EC4899", group: "mehr", defaultViewForMembers: true,  defaultEditForMembers: false },
