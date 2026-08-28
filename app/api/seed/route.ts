@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/db";
 import { getApiSession } from "@/lib/api-auth";
+import { hasValidSetupSecret } from "@/lib/setup-secret";
 import User from "@/models/User";
 import Household from "@/models/Household";
 import Category from "@/models/Category";
@@ -202,8 +203,9 @@ function getCurrentMonth(): string {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
-  // Admin-only: only the seeded admin account or NODE_ENV=development may run this
-  if (process.env.NODE_ENV === "production") {
+  const bootstrap = hasValidSetupSecret(request);
+  // Admin-only in production unless bootstrap secret is provided
+  if (process.env.NODE_ENV === "production" && !bootstrap) {
     const session = await getApiSession();
     if (!session) return NextResponse.json({ error: "Nicht autorisiert" }, { status: 401 });
     const role = (session.user as { role?: string }).role;
@@ -222,17 +224,27 @@ export async function POST(request: NextRequest) {
     const existingUser = await User.findOne({ email }).lean();
     let adminUserId: import("mongoose").Types.ObjectId | undefined;
 
-    if (force || !existingUser) {
-      // Preserve householdId if user already exists
-      const existingHouseholdId = existingUser?.householdId;
-      await User.deleteOne({ email });
+    if (!existingUser) {
       const hashed = await bcrypt.hash(password, 12);
       const newUser = await User.create({
         name: "Jumaa Al-Marzouk", email, password: hashed, role: "admin",
-        householdId: existingHouseholdId,
+        isBlocked: false,
+        isApproved: true,
+        onboardingCompleted: true,
       });
       adminUserId = newUser._id as import("mongoose").Types.ObjectId;
       report.benutzer = "erstellt";
+    } else if (force) {
+      adminUserId = existingUser._id as import("mongoose").Types.ObjectId;
+      const hashed = await bcrypt.hash(password, 12);
+      await User.findByIdAndUpdate(adminUserId, {
+        password: hashed,
+        isBlocked: false,
+        isApproved: true,
+        role: "admin",
+        onboardingCompleted: true,
+      });
+      report.benutzer = "Passwort aktualisiert";
     } else {
       adminUserId = existingUser._id as import("mongoose").Types.ObjectId;
       report.benutzer = "bereits vorhanden";

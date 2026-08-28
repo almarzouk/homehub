@@ -4,6 +4,23 @@ import bcrypt from "bcryptjs";
 import { connectDB } from "./db";
 import User from "@/models/User";
 import { authConfig } from "./auth.config";
+import { CredentialsSignin } from "next-auth";
+
+class InvalidCredentialsError extends CredentialsSignin {
+  code = "invalid_credentials";
+}
+
+class BlockedUserError extends CredentialsSignin {
+  code = "blocked";
+}
+
+class PendingApprovalError extends CredentialsSignin {
+  code = "not_approved";
+}
+
+class AuthServerError extends CredentialsSignin {
+  code = "server_error";
+}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
@@ -46,29 +63,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Passwort", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+        if (!credentials?.email || !credentials?.password) {
+          throw new InvalidCredentialsError();
+        }
+
+        const email = (credentials.email as string).trim().toLowerCase();
+        if (!email) throw new InvalidCredentialsError();
 
         try {
           await connectDB();
 
-          const user = await User.findOne({
-            email: (credentials.email as string).toLowerCase(),
-          });
+          const user = await User.findOne({ email });
 
-          if (!user) return null;
+          if (!user) throw new InvalidCredentialsError();
 
           const isValid = await bcrypt.compare(
             credentials.password as string,
             user.password
           );
 
-          if (!isValid) return null;
+          if (!isValid) throw new InvalidCredentialsError();
 
-          // Block blocked users from logging in
-          if (user.isBlocked) return null;
-
-          // Block unapproved users (isApproved === false; undefined = legacy approved)
-          if (user.isApproved === false) return null;
+          if (user.isBlocked) throw new BlockedUserError();
+          if (user.isApproved === false) throw new PendingApprovalError();
 
           return {
             id: String(user._id),
@@ -79,8 +96,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             onboardingCompleted: user.onboardingCompleted,
           };
         } catch (error) {
+          if (error instanceof CredentialsSignin) throw error;
           console.error("[Auth] authorize error:", error);
-          return null;
+          throw new AuthServerError();
         }
       },
     }),

@@ -455,6 +455,9 @@ const de = {
     joinHousehold: "Haushalt beitreten", setup: "Einrichten",
     welcomeBack: "Willkommen zurück", loginDesc: "Melden Sie sich an",
     registerDesc: "Konto erstellen", invalidCredentials: "Ungültige Zugangsdaten",
+    accountBlocked: "Dein Konto wurde gesperrt. Bitte kontaktiere einen Admin.",
+    accountPending: "Dein Konto wartet noch auf Freigabe durch einen Admin.",
+    serverError: "Serverfehler bei der Anmeldung. Bitte später erneut versuchen.",
     passwordMin: "Mindestens 8 Zeichen", emailPlaceholder: "ihre@email.de", loginTagline: "Küche · Vorrat · Finanzen",
   },
   landing: {
@@ -1010,6 +1013,9 @@ const ar: typeof de = {
     joinHousehold: "الانضمام لمنزل", setup: "الإعداد",
     welcomeBack: "مرحباً بعودتك", loginDesc: "سجّل دخولك",
     registerDesc: "إنشاء حساب جديد", invalidCredentials: "بيانات غير صحيحة",
+    accountBlocked: "تم حظر حسابك. تواصل مع المسؤول.",
+    accountPending: "حسابك بانتظار موافقة المسؤول.",
+    serverError: "خطأ في الخادم. حاول لاحقًا.",
     passwordMin: "8 أحرف على الأقل", emailPlaceholder: "your@email.com", loginTagline: "المطبخ · المخزن · الماليات",
   },
   landing: {
@@ -1548,6 +1554,9 @@ const en: typeof de = {
     joinHousehold: "Join Household", setup: "Setup",
     welcomeBack: "Welcome back", loginDesc: "Sign in to your account",
     registerDesc: "Create a new account", invalidCredentials: "Invalid credentials",
+    accountBlocked: "Your account is blocked. Contact an admin.",
+    accountPending: "Your account is waiting for admin approval.",
+    serverError: "Server error during login. Please try again later.",
     passwordMin: "At least 8 characters", emailPlaceholder: "your@email.com", loginTagline: "Kitchen · Pantry · Finance",
   },
   landing: {
@@ -2064,6 +2073,9 @@ const es: typeof de = {
     joinHousehold: "Unirse al hogar", setup: "Configuración",
     welcomeBack: "Bienvenido de vuelta", loginDesc: "Inicia sesión",
     registerDesc: "Crea una nueva cuenta", invalidCredentials: "Credenciales inválidas",
+    accountBlocked: "Tu cuenta está bloqueada. Contacta a un admin.",
+    accountPending: "Tu cuenta espera aprobación del admin.",
+    serverError: "Error del servidor. Inténtalo más tarde.",
     passwordMin: "Al menos 8 caracteres", emailPlaceholder: "tu@email.com", loginTagline: "Cocina · Despensa · Finanzas",
   },
   landing: {
@@ -2580,6 +2592,9 @@ const pt: typeof de = {
     joinHousehold: "Entrar na casa", setup: "Configuração",
     welcomeBack: "Bem-vindo de volta", loginDesc: "Entre",
     registerDesc: "Crie uma nova conta", invalidCredentials: "Credenciais inválidas",
+    accountBlocked: "Sua conta está bloqueada. Contacte um admin.",
+    accountPending: "Sua conta aguarda aprovação do admin.",
+    serverError: "Erro do servidor. Tente novamente mais tarde.",
     passwordMin: "Pelo menos 8 caracteres", emailPlaceholder: "seu@email.com", loginTagline: "Cozinha · Despensa · Finanças",
   },
   landing: {
@@ -3098,6 +3113,9 @@ const bg: typeof de = {
     joinHousehold: "Присъедини се", setup: "Настройка",
     welcomeBack: "Добре дошъл обратно", loginDesc: "Влез в акаунта си",
     registerDesc: "Създай нов акаунт", invalidCredentials: "Невалидни данни",
+    accountBlocked: "Акаунтът ти е блокиран. Свържи се с администратор.",
+    accountPending: "Акаунтът ти чака одобрение от администратор.",
+    serverError: "Грешка в сървъра. Опитай отново по-късно.",
     passwordMin: "Поне 8 символа", emailPlaceholder: "your@email.com", loginTagline: "Кухня · Склад · Финанси",
   },
   landing: {

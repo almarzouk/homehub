@@ -18,6 +18,7 @@ export const authConfig: NextAuthConfig = {
         "/einrichten",
         "/api/auth",
         "/api/einrichten",
+        "/api/einrichten/passwort",
         "/api/registrieren",
         "/api/seed",
         "/api/vorrat/suche",

@@ -19,9 +19,13 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [loginError, setLoginError] = useState<string | null>(
-    error ? t("auth.invalidCredentials") : null
-  );
+  const [loginError, setLoginError] = useState<string | null>(() => {
+    if (!error) return null;
+    if (error === "blocked") return t("auth.accountBlocked");
+    if (error === "not_approved") return t("auth.accountPending");
+    if (error === "server_error") return t("auth.serverError");
+    return t("auth.invalidCredentials");
+  });
 
   useEffect(() => {
     fetch("/api/einrichten")
@@ -46,7 +50,11 @@ function LoginForm() {
     setLoading(false);
 
     if (result?.error) {
-      setLoginError(t("auth.invalidCredentials"));
+      const code = result.code ?? result.error;
+      if (code === "blocked") setLoginError(t("auth.accountBlocked"));
+      else if (code === "not_approved") setLoginError(t("auth.accountPending"));
+      else if (code === "server_error") setLoginError(t("auth.serverError"));
+      else setLoginError(t("auth.invalidCredentials"));
     } else {
       router.push(callbackUrl);
       router.refresh();
