@@ -35,6 +35,7 @@ function LoginForm() {
         if (!r.ok || data.dbOk === false) {
           if (!data.mongoConfigured) setDbError(t("auth.dbNotConfigured"));
           else if (!data.authConfigured) setDbError(t("auth.authNotConfigured"));
+          else if (data.error === "db_host_not_found") setDbError(t("auth.dbHostNotFound"));
           else setDbError(t("auth.dbConnectionError"));
           return;
         }

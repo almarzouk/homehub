@@ -461,6 +461,7 @@ const de = {
     dbNotConfigured: "Datenbank nicht konfiguriert (MONGODB_URI fehlt auf dem Server).",
     authNotConfigured: "Authentifizierung nicht konfiguriert (AUTH_SECRET fehlt auf dem Server).",
     dbConnectionError: "Keine Verbindung zur Datenbank. Prüfe MONGODB_URI und MongoDB Atlas Netzwerkzugriff.",
+    dbHostNotFound: "MongoDB-Cluster nicht gefunden. Der Host in MONGODB_URI existiert nicht — hole einen neuen Connection String aus MongoDB Atlas.",
     passwordMin: "Mindestens 8 Zeichen", emailPlaceholder: "ihre@email.de", loginTagline: "Küche · Vorrat · Finanzen",
   },
   landing: {
@@ -1022,6 +1023,7 @@ const ar: typeof de = {
     dbNotConfigured: "قاعدة البيانات غير مضبوطة (MONGODB_URI مفقود على السيرفر).",
     authNotConfigured: "المصادقة غير مضبوطة (AUTH_SECRET مفقود على السيرفر).",
     dbConnectionError: "لا يمكن الاتصال بقاعدة البيانات. تحقق من MONGODB_URI وإعدادات MongoDB Atlas.",
+    dbHostNotFound: "لم يتم العثور على cluster MongoDB. الرابط في MONGODB_URI غير صحيح — أنشئ cluster جديداً وانسخ Connection String من Atlas.",
     passwordMin: "8 أحرف على الأقل", emailPlaceholder: "your@email.com", loginTagline: "المطبخ · المخزن · الماليات",
   },
   landing: {
@@ -1566,6 +1568,7 @@ const en: typeof de = {
     dbNotConfigured: "Database not configured (MONGODB_URI missing on server).",
     authNotConfigured: "Authentication not configured (AUTH_SECRET missing on server).",
     dbConnectionError: "Cannot connect to database. Check MONGODB_URI and MongoDB Atlas network access.",
+    dbHostNotFound: "MongoDB cluster not found. The host in MONGODB_URI does not exist — copy a fresh connection string from MongoDB Atlas.",
     passwordMin: "At least 8 characters", emailPlaceholder: "your@email.com", loginTagline: "Kitchen · Pantry · Finance",
   },
   landing: {
@@ -2088,6 +2091,7 @@ const es: typeof de = {
     dbNotConfigured: "Base de datos no configurada (falta MONGODB_URI en el servidor).",
     authNotConfigured: "Autenticación no configurada (falta AUTH_SECRET en el servidor).",
     dbConnectionError: "No se puede conectar a la base de datos. Revisa MONGODB_URI y MongoDB Atlas.",
+    dbHostNotFound: "Cluster MongoDB no encontrado. El host en MONGODB_URI no existe — copia un nuevo connection string desde Atlas.",
     passwordMin: "Al menos 8 caracteres", emailPlaceholder: "tu@email.com", loginTagline: "Cocina · Despensa · Finanzas",
   },
   landing: {
@@ -2610,6 +2614,7 @@ const pt: typeof de = {
     dbNotConfigured: "Banco de dados não configurado (MONGODB_URI ausente no servidor).",
     authNotConfigured: "Autenticação não configurada (AUTH_SECRET ausente no servidor).",
     dbConnectionError: "Não foi possível conectar ao banco de dados. Verifique MONGODB_URI e MongoDB Atlas.",
+    dbHostNotFound: "Cluster MongoDB não encontrado. O host em MONGODB_URI não existe — copie um novo connection string do Atlas.",
     passwordMin: "Pelo menos 8 caracteres", emailPlaceholder: "seu@email.com", loginTagline: "Cozinha · Despensa · Finanças",
   },
   landing: {
@@ -3134,6 +3139,7 @@ const bg: typeof de = {
     dbNotConfigured: "Базата данни не е конфигурирана (липсва MONGODB_URI на сървъра).",
     authNotConfigured: "Удостоверяването не е конфигурирано (липсва AUTH_SECRET на сървъра).",
     dbConnectionError: "Няма връзка с базата данни. Провери MONGODB_URI и MongoDB Atlas.",
+    dbHostNotFound: "MongoDB cluster не е намерен. Host-ът в MONGODB_URI не съществува — копирай нов connection string от Atlas.",
     passwordMin: "Поне 8 символа", emailPlaceholder: "your@email.com", loginTagline: "Кухня · Склад · Финанси",
   },
   landing: {

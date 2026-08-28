@@ -26,8 +26,12 @@ export async function GET() {
     });
   } catch (error) {
     console.error("[Einrichten] GET db error:", error);
+    const message = error instanceof Error ? error.message : "";
+    const errorCode = message.includes("ENOTFOUND") || message.includes("querySrv")
+      ? "db_host_not_found"
+      : "db_connection";
     return NextResponse.json(
-      { hasUsers: false, dbOk: false, mongoConfigured, authConfigured, error: "db_connection" },
+      { hasUsers: false, dbOk: false, mongoConfigured, authConfigured, error: errorCode },
       { status: 503 }
     );
   }
