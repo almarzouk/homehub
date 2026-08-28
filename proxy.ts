@@ -23,7 +23,8 @@ export default async function middleware(req: NextRequest) {
   if (authHeader?.startsWith("Bearer ") && req.nextUrl.pathname.startsWith("/api/")) {
     try {
       const token = authHeader.slice(7);
-      const secret = new TextEncoder().encode(process.env.AUTH_SECRET!);
+      const secret = new TextEncoder().encode(process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET ?? "");
+      if (!process.env.AUTH_SECRET && !process.env.NEXTAUTH_SECRET) throw new Error("no secret");
       const { payload } = await jwtVerify(token, secret);
       if (payload.mobile) {
         // Gültiger mobiler Token — Anfrage direkt weiterleiten mit User-Headern

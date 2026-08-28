@@ -5,12 +5,31 @@ import Household from "@/models/Household";
 import bcrypt from "bcryptjs";
 
 export async function GET() {
+  const mongoConfigured = !!process.env.MONGODB_URI;
+  const authConfigured = !!(process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET);
+
+  if (!mongoConfigured) {
+    return NextResponse.json(
+      { hasUsers: false, dbOk: false, mongoConfigured, authConfigured, error: "mongo_missing" },
+      { status: 503 }
+    );
+  }
+
   try {
     await connectDB();
     const count = await User.countDocuments();
-    return NextResponse.json({ hasUsers: count > 0 });
-  } catch {
-    return NextResponse.json({ error: "Datenbankfehler" }, { status: 500 });
+    return NextResponse.json({
+      hasUsers: count > 0,
+      dbOk: true,
+      mongoConfigured,
+      authConfigured,
+    });
+  } catch (error) {
+    console.error("[Einrichten] GET db error:", error);
+    return NextResponse.json(
+      { hasUsers: false, dbOk: false, mongoConfigured, authConfigured, error: "db_connection" },
+      { status: 503 }
+    );
   }
 }
 

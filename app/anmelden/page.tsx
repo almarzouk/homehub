@@ -26,15 +26,22 @@ function LoginForm() {
     if (error === "server_error") return t("auth.serverError");
     return t("auth.invalidCredentials");
   });
+  const [dbError, setDbError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/einrichten")
-      .then((r) => r.json())
-      .then((data) => {
+      .then(async (r) => {
+        const data = await r.json();
+        if (!r.ok || data.dbOk === false) {
+          if (!data.mongoConfigured) setDbError(t("auth.dbNotConfigured"));
+          else if (!data.authConfigured) setDbError(t("auth.authNotConfigured"));
+          else setDbError(t("auth.dbConnectionError"));
+          return;
+        }
         if (data.hasUsers === false) router.replace("/einrichten");
       })
-      .catch(() => {});
-  }, [router]);
+      .catch(() => setDbError(t("auth.dbConnectionError")));
+  }, [router, t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,6 +89,14 @@ function LoginForm() {
             style={{ background: "var(--success-subtle)", borderColor: "var(--success)", color: "var(--success)" }}>
             <AlertCircle className="h-4 w-4 flex-shrink-0" />
             Konto erstellt! Bitte melde dich an.
+          </div>
+        )}
+
+        {dbError && (
+          <div className="flex items-center gap-2 rounded-xl px-4 py-3 text-sm mb-5 border"
+            style={{ background: "var(--danger-subtle)", borderColor: "var(--danger)", color: "var(--danger)" }}>
+            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            {dbError}
           </div>
         )}
 

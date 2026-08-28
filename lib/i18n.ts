@@ -458,6 +458,9 @@ const de = {
     accountBlocked: "Dein Konto wurde gesperrt. Bitte kontaktiere einen Admin.",
     accountPending: "Dein Konto wartet noch auf Freigabe durch einen Admin.",
     serverError: "Serverfehler bei der Anmeldung. Bitte später erneut versuchen.",
+    dbNotConfigured: "Datenbank nicht konfiguriert (MONGODB_URI fehlt auf dem Server).",
+    authNotConfigured: "Authentifizierung nicht konfiguriert (AUTH_SECRET fehlt auf dem Server).",
+    dbConnectionError: "Keine Verbindung zur Datenbank. Prüfe MONGODB_URI und MongoDB Atlas Netzwerkzugriff.",
     passwordMin: "Mindestens 8 Zeichen", emailPlaceholder: "ihre@email.de", loginTagline: "Küche · Vorrat · Finanzen",
   },
   landing: {
@@ -1016,6 +1019,9 @@ const ar: typeof de = {
     accountBlocked: "تم حظر حسابك. تواصل مع المسؤول.",
     accountPending: "حسابك بانتظار موافقة المسؤول.",
     serverError: "خطأ في الخادم. حاول لاحقًا.",
+    dbNotConfigured: "قاعدة البيانات غير مضبوطة (MONGODB_URI مفقود على السيرفر).",
+    authNotConfigured: "المصادقة غير مضبوطة (AUTH_SECRET مفقود على السيرفر).",
+    dbConnectionError: "لا يمكن الاتصال بقاعدة البيانات. تحقق من MONGODB_URI وإعدادات MongoDB Atlas.",
     passwordMin: "8 أحرف على الأقل", emailPlaceholder: "your@email.com", loginTagline: "المطبخ · المخزن · الماليات",
   },
   landing: {
@@ -1557,6 +1563,9 @@ const en: typeof de = {
     accountBlocked: "Your account is blocked. Contact an admin.",
     accountPending: "Your account is waiting for admin approval.",
     serverError: "Server error during login. Please try again later.",
+    dbNotConfigured: "Database not configured (MONGODB_URI missing on server).",
+    authNotConfigured: "Authentication not configured (AUTH_SECRET missing on server).",
+    dbConnectionError: "Cannot connect to database. Check MONGODB_URI and MongoDB Atlas network access.",
     passwordMin: "At least 8 characters", emailPlaceholder: "your@email.com", loginTagline: "Kitchen · Pantry · Finance",
   },
   landing: {
@@ -2076,6 +2085,9 @@ const es: typeof de = {
     accountBlocked: "Tu cuenta está bloqueada. Contacta a un admin.",
     accountPending: "Tu cuenta espera aprobación del admin.",
     serverError: "Error del servidor. Inténtalo más tarde.",
+    dbNotConfigured: "Base de datos no configurada (falta MONGODB_URI en el servidor).",
+    authNotConfigured: "Autenticación no configurada (falta AUTH_SECRET en el servidor).",
+    dbConnectionError: "No se puede conectar a la base de datos. Revisa MONGODB_URI y MongoDB Atlas.",
     passwordMin: "Al menos 8 caracteres", emailPlaceholder: "tu@email.com", loginTagline: "Cocina · Despensa · Finanzas",
   },
   landing: {
@@ -2595,6 +2607,9 @@ const pt: typeof de = {
     accountBlocked: "Sua conta está bloqueada. Contacte um admin.",
     accountPending: "Sua conta aguarda aprovação do admin.",
     serverError: "Erro do servidor. Tente novamente mais tarde.",
+    dbNotConfigured: "Banco de dados não configurado (MONGODB_URI ausente no servidor).",
+    authNotConfigured: "Autenticação não configurada (AUTH_SECRET ausente no servidor).",
+    dbConnectionError: "Não foi possível conectar ao banco de dados. Verifique MONGODB_URI e MongoDB Atlas.",
     passwordMin: "Pelo menos 8 caracteres", emailPlaceholder: "seu@email.com", loginTagline: "Cozinha · Despensa · Finanças",
   },
   landing: {
@@ -3116,6 +3131,9 @@ const bg: typeof de = {
     accountBlocked: "Акаунтът ти е блокиран. Свържи се с администратор.",
     accountPending: "Акаунтът ти чака одобрение от администратор.",
     serverError: "Грешка в сървъра. Опитай отново по-късно.",
+    dbNotConfigured: "Базата данни не е конфигурирана (липсва MONGODB_URI на сървъра).",
+    authNotConfigured: "Удостоверяването не е конфигурирано (липсва AUTH_SECRET на сървъра).",
+    dbConnectionError: "Няма връзка с базата данни. Провери MONGODB_URI и MongoDB Atlas.",
     passwordMin: "Поне 8 символа", emailPlaceholder: "your@email.com", loginTagline: "Кухня · Склад · Финанси",
   },
   landing: {
