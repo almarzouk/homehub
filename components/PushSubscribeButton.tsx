@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Bell, BellOff, BellRing } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -11,15 +12,17 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 export default function PushSubscribeButton() {
-  const [status, setStatus] = useState<"idle" | "subscribed" | "denied" | "loading">("idle");
+  const { t } = useTranslation();
+  const [status, setStatus] = useState<"idle" | "subscribed" | "denied" | "loading" | "unsupported">("idle");
 
   useEffect(() => {
-    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+      setStatus("unsupported");
+      return;
+    }
 
-    // Register SW
     navigator.serviceWorker.register("/sw.js").catch(console.error);
 
-    // Check current permission
     if (Notification.permission === "granted") {
       navigator.serviceWorker.ready.then((reg) => {
         reg.pushManager.getSubscription().then((sub) => {
@@ -33,15 +36,19 @@ export default function PushSubscribeButton() {
 
   const subscribe = async () => {
     if (!("serviceWorker" in navigator)) {
-      alert("Browser unterstützt keine Push-Benachrichtigungen.");
+      alert(t("push.unsupported"));
       return;
     }
     setStatus("loading");
 
     try {
-      // Get VAPID public key
       const vapidRes = await fetch("/api/push/register");
       const { vapidPublicKey } = await vapidRes.json();
+      if (!vapidPublicKey) {
+        alert(t("push.notConfigured"));
+        setStatus("idle");
+        return;
+      }
 
       const permission = await Notification.requestPermission();
       if (permission !== "granted") {
@@ -75,11 +82,13 @@ export default function PushSubscribeButton() {
     setStatus("idle");
   };
 
+  if (status === "unsupported") return null;
+
   if (status === "denied") {
     return (
       <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-50 dark:bg-red-950/30 text-xs text-red-500">
         <BellOff className="h-3.5 w-3.5" />
-        Benachrichtigungen blockiert
+        {t("push.blocked")}
       </div>
     );
   }
@@ -89,7 +98,7 @@ export default function PushSubscribeButton() {
       <button onClick={unsubscribe}
         className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 dark:bg-green-950/30 text-xs font-medium text-green-700 dark:text-green-400 hover:bg-green-100 transition-colors border border-green-200 dark:border-green-800">
         <BellRing className="h-3.5 w-3.5 animate-[wiggle_1s_ease-in-out]" />
-        Benachrichtigungen aktiv
+        {t("push.active")}
       </button>
     );
   }
@@ -98,7 +107,7 @@ export default function PushSubscribeButton() {
     <button onClick={subscribe} disabled={status === "loading"}
       className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/30 text-xs font-medium text-blue-700 dark:text-blue-400 hover:bg-blue-100 transition-colors border border-blue-200 dark:border-blue-800 disabled:opacity-60">
       <Bell className="h-3.5 w-3.5" />
-      {status === "loading" ? "Aktiviere…" : "Benachrichtigungen aktivieren"}
+      {status === "loading" ? t("push.enabling") : t("push.enable")}
     </button>
   );
 }

@@ -420,6 +420,25 @@ const de = {
     saving: "Speichern…",
     saved: "Gespeichert",
     deleteTabConfirm: "Dieses Dokument wirklich löschen?",
+    toolbar: {
+      bold: "Fett",
+      italic: "Kursiv",
+      strike: "Durchgestrichen",
+      heading: "Überschrift",
+      bulletList: "Aufzählung",
+      orderedList: "Nummerierte Liste",
+      divider: "Trennlinie",
+      undo: "Rückgängig",
+      redo: "Wiederholen",
+    },
+  },
+  push: {
+    enable: "Benachrichtigungen aktivieren",
+    enabling: "Aktiviere…",
+    active: "Benachrichtigungen aktiv",
+    blocked: "Benachrichtigungen blockiert",
+    unsupported: "Browser unterstützt keine Push-Benachrichtigungen.",
+    notConfigured: "Push-Benachrichtigungen sind noch nicht konfiguriert.",
   },
   energie: {
     title: "Energieverbrauch", add: "Verbrauch hinzufügen",
@@ -985,6 +1004,17 @@ const ar: typeof de = {
     saving: "جاري الحفظ…",
     saved: "تم الحفظ",
     deleteTabConfirm: "هل تريد حذف هذا المستند؟",
+    toolbar: {
+      bold: "عريض", italic: "مائل", strike: "يتوسطه خط",
+      heading: "عنوان", bulletList: "قائمة نقطية", orderedList: "قائمة مرقمة",
+      divider: "فاصل", undo: "تراجع", redo: "إعادة",
+    },
+  },
+  push: {
+    enable: "تفعيل الإشعارات", enabling: "جاري التفعيل…",
+    active: "الإشعارات مفعّلة", blocked: "الإشعارات محظورة",
+    unsupported: "المتصفح لا يدعم إشعارات الدفع.",
+    notConfigured: "إشعارات الدفع غير مهيأة بعد.",
   },
   energie: {
     title: "استهلاك الطاقة", add: "إضافة استهلاك", noData: "لا توجد بيانات",
@@ -1532,6 +1562,17 @@ const en: typeof de = {
     saving: "Saving…",
     saved: "Saved",
     deleteTabConfirm: "Delete this document?",
+    toolbar: {
+      bold: "Bold", italic: "Italic", strike: "Strikethrough",
+      heading: "Heading", bulletList: "Bullet list", orderedList: "Numbered list",
+      divider: "Divider", undo: "Undo", redo: "Redo",
+    },
+  },
+  push: {
+    enable: "Enable notifications", enabling: "Enabling…",
+    active: "Notifications active", blocked: "Notifications blocked",
+    unsupported: "Browser does not support push notifications.",
+    notConfigured: "Push notifications are not configured yet.",
   },
   energie: {
     title: "Energy Usage", add: "Add Usage", noData: "No data",
@@ -2055,6 +2096,17 @@ const es: typeof de = {
     saving: "Guardando…",
     saved: "Guardado",
     deleteTabConfirm: "¿Eliminar este documento?",
+    toolbar: {
+      bold: "Negrita", italic: "Cursiva", strike: "Tachado",
+      heading: "Encabezado", bulletList: "Lista con viñetas", orderedList: "Lista numerada",
+      divider: "Separador", undo: "Deshacer", redo: "Rehacer",
+    },
+  },
+  push: {
+    enable: "Activar notificaciones", enabling: "Activando…",
+    active: "Notificaciones activas", blocked: "Notificaciones bloqueadas",
+    unsupported: "El navegador no admite notificaciones push.",
+    notConfigured: "Las notificaciones push aún no están configuradas.",
   },
   energie: {
     title: "Consumo energético", add: "Añadir consumo", noData: "Sin datos",
@@ -2578,6 +2630,17 @@ const pt: typeof de = {
     saving: "Salvando…",
     saved: "Salvo",
     deleteTabConfirm: "Excluir este documento?",
+    toolbar: {
+      bold: "Negrito", italic: "Itálico", strike: "Tachado",
+      heading: "Título", bulletList: "Lista com marcadores", orderedList: "Lista numerada",
+      divider: "Separador", undo: "Desfazer", redo: "Refazer",
+    },
+  },
+  push: {
+    enable: "Ativar notificações", enabling: "Ativando…",
+    active: "Notificações ativas", blocked: "Notificações bloqueadas",
+    unsupported: "O navegador não suporta notificações push.",
+    notConfigured: "Notificações push ainda não estão configuradas.",
   },
   energie: {
     title: "Consumo de energia", add: "Adicionar consumo", noData: "Sem dados",
@@ -3102,6 +3165,17 @@ const bg: typeof de = {
     saving: "Запазване…",
     saved: "Запазено",
     deleteTabConfirm: "Изтриване на този документ?",
+    toolbar: {
+      bold: "Удебелен", italic: "Курсив", strike: "Зачеркнат",
+      heading: "Заглавие", bulletList: "Маркиран списък", orderedList: "Номериран списък",
+      divider: "Разделител", undo: "Отмени", redo: "Повтори",
+    },
+  },
+  push: {
+    enable: "Активирай известия", enabling: "Активиране…",
+    active: "Известията са активни", blocked: "Известията са блокирани",
+    unsupported: "Браузърът не поддържа push известия.",
+    notConfigured: "Push известията все още не са конфигурирани.",
   },
   energie: {
     title: "Потребление на енергия", add: "Добави потребление", noData: "Няма данни",

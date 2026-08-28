@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { Types } from "mongoose";
 import { getApiSession } from "@/lib/api-auth";
 import { connectDB } from "@/lib/db";
+import { requireFinanzenAccess } from "@/lib/permissions";
 import Expense from "@/models/Expense";
 
 export async function GET(request: NextRequest) {
   const session = await getApiSession();
   if (!session) return NextResponse.json({ error: "Nicht autorisiert" }, { status: 401 });
+  const denied = await requireFinanzenAccess(session, "view");
+  if (denied) return denied;
 
   try {
     await connectDB();

@@ -2,13 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 import { requireSession } from "@/lib/api-auth";
 import { connectDB } from "@/lib/db";
+import { requireFinanzenAccess } from "@/lib/permissions";
 import Expense from "@/models/Expense";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
 export async function GET(_req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireSession();
+  const { error, session } = await requireSession();
   if (error) return error;
+  const denied = await requireFinanzenAccess(session!, "view");
+  if (denied) return denied;
 
   const { id } = await params;
   if (!mongoose.Types.ObjectId.isValid(id)) return NextResponse.json({ error: "Ungültige ID" }, { status: 400 });
@@ -20,8 +23,10 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
 }
 
 export async function PUT(request: NextRequest, { params }: RouteParams) {
-  const { error } = await requireSession();
+  const { error, session } = await requireSession();
   if (error) return error;
+  const denied = await requireFinanzenAccess(session!, "edit");
+  if (denied) return denied;
 
   const { id } = await params;
   if (!mongoose.Types.ObjectId.isValid(id)) return NextResponse.json({ error: "Ungültige ID" }, { status: 400 });
@@ -45,8 +50,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 }
 
 export async function DELETE(_req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireSession();
+  const { error, session } = await requireSession();
   if (error) return error;
+  const denied = await requireFinanzenAccess(session!, "edit");
+  if (denied) return denied;
 
   const { id } = await params;
   if (!mongoose.Types.ObjectId.isValid(id)) return NextResponse.json({ error: "Ungültige ID" }, { status: 400 });

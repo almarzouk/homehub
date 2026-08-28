@@ -67,6 +67,7 @@ const sections: NavSection[] = [
       { href: "/finanzen/ausgaben", labelKey: "nav.items.ausgaben", icon: Receipt },
       { href: "/finanzen/fixkosten", labelKey: "nav.items.fixkosten", icon: Lock },
       { href: "/finanzen/sparziele", labelKey: "nav.items.sparziele", icon: PiggyBank },
+      { href: "/finanzen/investitionen", labelKey: "nav.items.investitionen", icon: TrendingUp },
       { href: "/finanzen/monatsplan", labelKey: "nav.items.monatsplan", icon: CalendarClock },
       { href: "/finanzen/gehalt", labelKey: "nav.items.gehalt", icon: Wallet },
       { href: "/finanzen/berichte", labelKey: "nav.items.berichte", icon: FileBarChart },

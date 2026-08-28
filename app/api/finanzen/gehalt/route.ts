@@ -3,10 +3,13 @@ import { requireSession } from "@/lib/api-auth";
 import { connectDB } from "@/lib/db";
 import { getCurrentMonth } from "@/lib/utils";
 import SalaryConfig from "@/models/SalaryConfig";
+import { requireFinanzenAccess } from "@/lib/permissions";
 
 export async function GET(request: NextRequest) {
-  const { error } = await requireSession();
+  const { error, session } = await requireSession();
   if (error) return error;
+  const denied = await requireFinanzenAccess(session!, "view");
+  if (denied) return denied;
 
   const { searchParams } = new URL(request.url);
   const month = searchParams.get("month") ?? getCurrentMonth();
@@ -17,8 +20,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const { error } = await requireSession();
+  const { error, session } = await requireSession();
   if (error) return error;
+  const denied = await requireFinanzenAccess(session!, "edit");
+  if (denied) return denied;
 
   try {
     await connectDB();

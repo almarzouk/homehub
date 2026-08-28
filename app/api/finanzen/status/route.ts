@@ -6,11 +6,14 @@ import User from "@/models/User";
 import SalaryConfig from "@/models/SalaryConfig";
 import Fixkosten from "@/models/Fixkosten";
 import SavingsGoal from "@/models/SavingsGoal";
+import { requireFinanzenAccess } from "@/lib/permissions";
 
 /** GET /api/finanzen/status — whether finance onboarding is needed */
 export async function GET() {
   const { error, session } = await requireSession();
   if (error) return error;
+  const denied = await requireFinanzenAccess(session!, "view");
+  if (denied) return denied;
 
   await connectDB();
   const userId = session!.user!.id;
@@ -38,6 +41,8 @@ export async function GET() {
 export async function POST() {
   const { error, session } = await requireSession();
   if (error) return error;
+  const denied = await requireFinanzenAccess(session!, "edit");
+  if (denied) return denied;
 
   await connectDB();
   await User.findByIdAndUpdate(session!.user!.id, { finanzenSetupSkipped: true });

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
+import DocRichEditor from "@/components/docs/DocRichEditor";
 import { FilePenLine, Plus, X, Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -208,11 +209,11 @@ export default function DocsPage() {
               )}
             </div>
           </div>
-          <textarea
-            value={content}
-            onChange={(e) => onContentChange(e.target.value)}
+          <DocRichEditor
+            content={content}
+            onChange={onContentChange}
             placeholder={t("docs.placeholder")}
-            className="flex-1 w-full resize-none rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 md:p-6 text-sm md:text-base leading-relaxed text-gray-800 dark:text-gray-200 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/40 min-h-0"
+            className="flex-1 min-h-0"
           />
         </div>
       ) : (

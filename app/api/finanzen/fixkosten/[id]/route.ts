@@ -3,12 +3,15 @@ import mongoose from "mongoose";
 import { requireSession } from "@/lib/api-auth";
 import { connectDB } from "@/lib/db";
 import Fixkosten from "@/models/Fixkosten";
+import { requireFinanzenAccess } from "@/lib/permissions";
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function PUT(request: NextRequest, { params }: Params) {
-  const { error } = await requireSession();
+  const { error, session } = await requireSession();
   if (error) return error;
+  const denied = await requireFinanzenAccess(session!, "edit");
+  if (denied) return denied;
 
   const { id } = await params;
   if (!mongoose.Types.ObjectId.isValid(id))
@@ -22,8 +25,10 @@ export async function PUT(request: NextRequest, { params }: Params) {
 }
 
 export async function DELETE(_: NextRequest, { params }: Params) {
-  const { error } = await requireSession();
+  const { error, session } = await requireSession();
   if (error) return error;
+  const denied = await requireFinanzenAccess(session!, "edit");
+  if (denied) return denied;
 
   const { id } = await params;
   if (!mongoose.Types.ObjectId.isValid(id))

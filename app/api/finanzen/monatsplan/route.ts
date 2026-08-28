@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/api-auth";
 import { connectDB } from "@/lib/db";
 import mongoose, { Schema, Model } from "mongoose";
+import { requireFinanzenAccess } from "@/lib/permissions";
 
 // Simple month-keyed plan with custom items
 interface ISimpleMonthPlan {
@@ -24,8 +25,10 @@ const SimpleMonthPlan: Model<ISimpleMonthPlan> =
   mongoose.model<ISimpleMonthPlan>("SimpleMonthPlan", simplePlanSchema);
 
 export async function GET(request: NextRequest) {
-  const { error } = await requireSession();
+  const { error, session } = await requireSession();
   if (error) return error;
+  const denied = await requireFinanzenAccess(session!, "view");
+  if (denied) return denied;
   const month = new URL(request.url).searchParams.get("month") ?? "";
   await connectDB();
   const plan = await SimpleMonthPlan.findOne({ month }).lean();
@@ -33,8 +36,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const { error } = await requireSession();
+  const { error, session } = await requireSession();
   if (error) return error;
+  const denied = await requireFinanzenAccess(session!, "edit");
+  if (denied) return denied;
   await connectDB();
   const body = await request.json();
   const { month, items } = body;

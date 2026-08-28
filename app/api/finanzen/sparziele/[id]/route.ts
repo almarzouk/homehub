@@ -3,12 +3,15 @@ import mongoose from "mongoose";
 import { requireSession } from "@/lib/api-auth";
 import { connectDB } from "@/lib/db";
 import SavingsGoal from "@/models/SavingsGoal";
+import { requireFinanzenAccess } from "@/lib/permissions";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
 export async function DELETE(_req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireSession();
+  const { error, session } = await requireSession();
   if (error) return error;
+  const denied = await requireFinanzenAccess(session!, "edit");
+  if (denied) return denied;
   const { id } = await params;
   if (!mongoose.Types.ObjectId.isValid(id)) return NextResponse.json({ error: "Ungültige ID" }, { status: 400 });
   await connectDB();
@@ -18,8 +21,10 @@ export async function DELETE(_req: NextRequest, { params }: RouteParams) {
 }
 
 export async function PUT(request: NextRequest, { params }: RouteParams) {
-  const { error } = await requireSession();
+  const { error, session } = await requireSession();
   if (error) return error;
+  const denied = await requireFinanzenAccess(session!, "edit");
+  if (denied) return denied;
   const { id } = await params;
   if (!mongoose.Types.ObjectId.isValid(id)) return NextResponse.json({ error: "Ungültige ID" }, { status: 400 });
   await connectDB();

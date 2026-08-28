@@ -78,8 +78,8 @@ export async function POST(request: NextRequest) {
     const payload = JSON.stringify({
       title,
       body,
-      icon: "/icon-192.png",
-      badge: "/badge-72.png",
+      icon: "/icon-192.svg",
+      badge: "/icon-192.svg",
       url: url ?? "/",
       senderName,
       timestamp: Date.now(),

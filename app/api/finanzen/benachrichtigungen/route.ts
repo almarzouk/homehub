@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/api-auth";
 import { connectDB } from "@/lib/db";
 import FinanzAlert from "@/models/FinanzAlert";
+import { requireFinanzenAccess } from "@/lib/permissions";
 
 export async function GET(request: NextRequest) {
-  const { error } = await requireSession();
+  const { error, session } = await requireSession();
   if (error) return error;
+  const denied = await requireFinanzenAccess(session!, "view");
+  if (denied) return denied;
 
   const { searchParams } = new URL(request.url);
   const unreadOnly = searchParams.get("ungelesen") === "1";
@@ -21,8 +24,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const { error } = await requireSession();
+  const { error, session } = await requireSession();
   if (error) return error;
+  const denied = await requireFinanzenAccess(session!, "edit");
+  if (denied) return denied;
 
   try {
     await connectDB();

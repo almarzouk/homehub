@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/api-auth";
 import { connectDB } from "@/lib/db";
 import Investment from "@/models/Investment";
+import { requireFinanzenAccess } from "@/lib/permissions";
 
 export async function GET() {
   const { error, session } = await requireSession();
   if (error) return error;
+  const denied = await requireFinanzenAccess(session!, "view");
+  if (denied) return denied;
 
   await connectDB();
   const householdId = (session!.user as { householdId?: string }).householdId;
@@ -17,6 +20,8 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const { error, session } = await requireSession();
   if (error) return error;
+  const denied = await requireFinanzenAccess(session!, "edit");
+  if (denied) return denied;
 
   try {
     await connectDB();

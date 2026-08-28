@@ -88,3 +88,28 @@ export function denyResponse(
   }
   return null;
 }
+
+/** Resolve permissions and return a 403 Response, or null when allowed. */
+export async function checkModulePermission(
+  userId: string,
+  householdId: string | undefined,
+  moduleKey: string,
+  action: "view" | "edit"
+): Promise<Response | null> {
+  if (!householdId) return null;
+  const perms = await getUserPermissions(userId, householdId);
+  return denyResponse(perms, moduleKey, action);
+}
+
+/** Convenience wrapper for finance API routes. */
+export async function requireFinanzenAccess(
+  session: { user?: { id?: string; householdId?: string } },
+  action: "view" | "edit"
+): Promise<Response | null> {
+  return checkModulePermission(
+    session.user?.id ?? "",
+    (session.user as { householdId?: string } | undefined)?.householdId,
+    "finanzen",
+    action
+  );
+}
